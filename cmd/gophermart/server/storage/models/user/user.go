@@ -2,7 +2,7 @@ package user
 
 // User описывает пользователя
 type User struct {
-	Id           int    `json:"id,omitempty"`
+	ID           int    `json:"id,omitempty"`
 	Login        string `json:"login"`          // Логин
 	PasswordHash string `json:"password"`       // Пароль
 	Name         string `json:"name,omitempty"` // Имя

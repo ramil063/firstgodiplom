@@ -18,7 +18,7 @@ func (s *Storage) GetUser(login string) (user.User, error) {
 		context.Background(),
 		"SELECT id, login, password, name FROM users WHERE login = $1",
 		login)
-	err := row.Scan(&u.Id, &u.Login, &u.PasswordHash, &u.Name)
+	err := row.Scan(&u.ID, &u.Login, &u.PasswordHash, &u.Name)
 	return u, err
 }
 
@@ -42,7 +42,7 @@ func (s *Storage) GetOrder(number string) (user.Order, error) {
 				LEFT JOIN status s ON s.id = o.status_id
 				WHERE number = $1`,
 		number)
-	err := row.Scan(&o.Id, &o.Number, &o.Accrual, &o.Status, &o.UploadedAt, &o.UserLogin)
+	err := row.Scan(&o.ID, &o.Number, &o.Accrual, &o.Status, &o.UploadedAt, &o.UserLogin)
 	return o, err
 }
 

@@ -2,7 +2,7 @@ package user
 
 // Order описывает структуру заказа
 type Order struct {
-	Id         int    `json:"id,omitempty"`   // Идентификатор
+	ID         int    `json:"id,omitempty"`   // Идентификатор
 	Number     string `json:"number"`         // Номер
 	Status     string `json:"status"`         // Статус
 	Accrual    int    `json:"accrual"`        // Начисления
@@ -12,7 +12,7 @@ type Order struct {
 
 // OrderCheckAccrual описывает структуру заказа
 type OrderCheckAccrual struct {
-	Id        int    `json:"id,omitempty"`   // Идентификатор
+	ID        int    `json:"id,omitempty"`   // Идентификатор
 	Number    string `json:"number"`         // Номер
 	Status    string `json:"status"`         // Статус
 	Accrual   int    `json:"accrual"`        // Начисления

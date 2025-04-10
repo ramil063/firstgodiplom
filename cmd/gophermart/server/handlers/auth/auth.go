@@ -34,11 +34,11 @@ func CheckAuthenticatedUser(s storage.Storager, token string) error {
 	tokenData, err := s.GetAccessTokenData(token)
 
 	if errors.Is(err, pgx.ErrNoRows) {
-		return internalErrors.IncorrectToken
+		return internalErrors.ErrIncorrectToken
 	}
 
 	if tokenData.AccessTokenExpiredAt < time.Now().Unix() {
-		return internalErrors.ExpiredToken
+		return internalErrors.ErrExpiredToken
 	}
 	return err
 }

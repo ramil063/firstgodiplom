@@ -125,15 +125,15 @@ func UpdateToken(dbr *Repository, login string, token string, expiredAt int64) (
 	return exec, nil
 }
 
-func AddOrder(dbr *Repository, number string, accrual int, statusId int, uploadedAt string, userId int) (pgconn.CommandTag, error) {
+func AddOrder(dbr *Repository, number string, accrual int, statusID int, uploadedAt string, userID int) (pgconn.CommandTag, error) {
 	exec, err := dbr.ExecContext(
 		context.Background(),
 		`INSERT INTO "order" (number, accrual, status_id, uploaded_at, user_id) VALUES ($1, $2, $3, $4, $5)`,
 		number,
 		accrual,
-		statusId,
+		statusID,
 		uploadedAt,
-		userId)
+		userID)
 
 	if err != nil {
 		var pgErr *pgconn.PgError
@@ -145,12 +145,12 @@ func AddOrder(dbr *Repository, number string, accrual int, statusId int, uploade
 	return exec, nil
 }
 
-func AddWithdraw(tx pgx.Tx, orderId int, sum int, processedAt string) (pgconn.CommandTag, error) {
+func AddWithdraw(tx pgx.Tx, orderID int, sum int, processedAt string) (pgconn.CommandTag, error) {
 	exec, err := tx.Exec(
 		context.Background(),
 		`INSERT INTO withdraw (sum, order_id, processed_at) VALUES ($1, $2, $3)`,
 		sum,
-		orderId,
+		orderID,
 		processedAt)
 
 	if err != nil {
@@ -179,7 +179,7 @@ func MinusBalance(tx pgx.Tx, sum int, login string) (pgconn.CommandTag, error) {
 	return exec, nil
 }
 
-func UpdateOrderAccrual(dbr *Repository, number string, accrual int, statusId int) (pgconn.CommandTag, error) {
+func UpdateOrderAccrual(dbr *Repository, number string, accrual int, statusID int) (pgconn.CommandTag, error) {
 	exec, err := dbr.ExecContext(
 		context.Background(),
 		`
@@ -187,7 +187,7 @@ func UpdateOrderAccrual(dbr *Repository, number string, accrual int, statusId in
 			SET "accrual" = $1, "status_id" = $2 
 			WHERE number = $3`,
 		accrual,
-		statusId,
+		statusID,
 		number)
 
 	if err != nil {

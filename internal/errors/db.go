@@ -7,7 +7,6 @@ import (
 )
 
 var ErrUniqueViolation = errors.New("unique violation")
-var EmptyResult = errors.New("empty result")
 
 type DBError struct {
 	Time time.Time

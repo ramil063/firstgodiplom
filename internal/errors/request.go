@@ -7,8 +7,8 @@ import (
 	"time"
 )
 
-var IncorrectToken = errors.New("incorrect access token")
-var ExpiredToken = errors.New("expired access token")
+var ErrIncorrectToken = errors.New("incorrect access token")
+var ErrExpiredToken = errors.New("expired access token")
 
 type RequestError struct {
 	Time       time.Time

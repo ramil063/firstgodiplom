@@ -56,17 +56,17 @@ func ProcessAccrual(c Clienter, s storage.Storager, ticker *time.Ticker) {
 }
 
 func SyncAccrual(c Clienter, url string, ordersCh chan user.OrderCheckAccrual, s storage.Storager, worker int, retryAfterChan chan int) {
-	ordersCheckUrl := url + "/api/orders/"
+	ordersCheckURL := url + "/api/orders/"
 
 	for order := range ordersCh {
-		responseCode, body, header, err := c.SendRequest("GET", ordersCheckUrl+order.Number, []byte{})
+		responseCode, body, header, err := c.SendRequest("GET", ordersCheckURL+order.Number, []byte{})
 
 		if err != nil {
 			logger.WriteErrorLog("error while check order in accrual system: " + err.Error())
 			log.Println("error while check order in accrual system" + err.Error())
 		}
 
-		log.Println(worker, "-worker; accrual-", responseCode, ordersCheckUrl+order.Number)
+		log.Println(worker, "-worker; accrual-", responseCode, ordersCheckURL+order.Number)
 
 		if responseCode == http.StatusOK {
 			var order accrualStorage.Order
