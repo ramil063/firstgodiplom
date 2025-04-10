@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 
+	accrualHandler "github.com/ramil063/firstgodiplom/cmd/gophermart/agent/accrual/handlers"
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/handlers/flags"
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/handlers/router"
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage"
@@ -37,6 +38,9 @@ func main() {
 	}
 
 	s := storage.NewDBStorage()
+	c := accrualHandler.NewClient()
+	accrualHandler.OrdersProcess(c, s)
+
 	if err = http.ListenAndServe(flags.RunAddress, router.Router(s)); err != nil {
 		panic(err)
 	}

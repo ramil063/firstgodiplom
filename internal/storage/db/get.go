@@ -2,6 +2,9 @@ package db
 
 import (
 	"context"
+	"time"
+
+	"github.com/lib/pq"
 
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage/models/user"
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage/models/user/balance"
@@ -71,6 +74,47 @@ func (s *Storage) GetOrders(login string) ([]user.Order, error) {
 			Status:     status,
 			Accrual:    accrual,
 			UploadedAt: uploadedAt,
+		})
+	}
+
+	err = rows.Err()
+	if err != nil {
+		logger.WriteErrorLog(err.Error())
+	}
+	return res, err
+}
+
+func (s *Storage) GetAllOrdersInStatuses(statuses []int) ([]user.OrderCheckAccrual, error) {
+	var res []user.OrderCheckAccrual
+
+	rows, err := dml.DBRepository.QueryContext(
+		context.Background(),
+		`SELECT number, accrual, s.alias
+				FROM "order" o
+				LEFT JOIN status s ON s.id = o.status_id
+				WHERE status_id = ANY($1)
+				AND (check_accrual_after IS NULL OR check_accrual_after <= $2)
+				LIMIT 50`,
+		pq.Array(statuses),
+		time.Now().Unix())
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var accrual int
+	var number, status string
+	for rows.Next() {
+		err = rows.Scan(&number, &accrual, &status)
+		if err != nil {
+			logger.WriteErrorLog(err.Error())
+			continue
+		}
+		res = append(res, user.OrderCheckAccrual{
+			Number:  number,
+			Accrual: accrual,
+			Status:  status,
 		})
 	}
 

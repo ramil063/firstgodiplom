@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/hIMEI29A/goluhn"
 	"github.com/jackc/pgx/v4"
+	"github.com/theplant/luhn"
 
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/handlers/auth"
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage"
@@ -30,7 +30,7 @@ func putOrder(rw http.ResponseWriter, r *http.Request, dbs storage.Storager) {
 		return
 	}
 
-	if goluhn.CheckLuhn(num) {
+	if !luhn.Valid(num) {
 		logger.WriteErrorLog("wrong format luhn number")
 		rw.WriteHeader(http.StatusUnprocessableEntity)
 		return

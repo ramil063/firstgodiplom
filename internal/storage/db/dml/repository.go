@@ -178,3 +178,36 @@ func MinusBalance(tx pgx.Tx, sum int, login string) (pgconn.CommandTag, error) {
 	}
 	return exec, nil
 }
+
+func UpdateOrderAccrual(dbr *Repository, number string, accrual int, statusId int) (pgconn.CommandTag, error) {
+	exec, err := dbr.ExecContext(
+		context.Background(),
+		`
+			UPDATE "order" 
+			SET "accrual" = $1, "status_id" = $2 
+			WHERE number = $3`,
+		accrual,
+		statusId,
+		number)
+
+	if err != nil {
+		return nil, err
+	}
+	return exec, nil
+}
+
+func UpdateOrderCheckAccrualAfter(dbr *Repository, number string, checkAccrualAfter int64) (pgconn.CommandTag, error) {
+	exec, err := dbr.ExecContext(
+		context.Background(),
+		`
+			UPDATE "order" 
+			SET "check_accrual_after" = $1
+			WHERE number = $2`,
+		checkAccrualAfter,
+		number)
+
+	if err != nil {
+		return nil, err
+	}
+	return exec, nil
+}

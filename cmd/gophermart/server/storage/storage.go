@@ -1,6 +1,7 @@
 package storage
 
 import (
+	accrualStorage "github.com/ramil063/firstgodiplom/cmd/gophermart/agent/accrual/storage"
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage/models/auth"
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage/models/user"
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage/models/user/balance"
@@ -20,7 +21,10 @@ type Userer interface {
 type Orderer interface {
 	GetOrder(number string) (user.Order, error)
 	GetOrders(login string) ([]user.Order, error)
+	GetAllOrdersInStatuses(statuses []int) ([]user.OrderCheckAccrual, error)
 	AddOrder(number string, tokenData user.AccessTokenData) error
+	UpdateOrderAccrual(order accrualStorage.Order) error
+	UpdateOrderCheckAccrualAfter(number string) error
 }
 
 type Balancer interface {

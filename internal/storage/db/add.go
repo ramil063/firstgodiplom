@@ -9,7 +9,7 @@ import (
 
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage/models/user"
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage/models/user/balance"
-	"github.com/ramil063/firstgodiplom/internal/constants/status"
+	orderStatus "github.com/ramil063/firstgodiplom/internal/constants/status"
 	"github.com/ramil063/firstgodiplom/internal/logger"
 	"github.com/ramil063/firstgodiplom/internal/storage/db/dml"
 )
@@ -43,7 +43,7 @@ func (s *Storage) AddOrder(number string, tokenData user.AccessTokenData) error 
 	now := time.Now()
 	rfc3339Time := now.Format(time.RFC3339)
 
-	result, err := dml.AddOrder(&dml.DBRepository, number, 0, status.NEW_ID, rfc3339Time, u.Id)
+	result, err := dml.AddOrder(&dml.DBRepository, number, 0, orderStatus.NewID, rfc3339Time, u.Id)
 	if err != nil {
 		return err
 	}

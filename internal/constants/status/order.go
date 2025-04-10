@@ -1,6 +1,6 @@
 package status
 
-const NEW_ID = 1
-const PROCESSING_ID = 2
-const INVALID_ID = 3
-const PROCESSED_ID = 4
+const NewID = 1
+const ProcessingID = 2
+const InvalidID = 3
+const ProcessedID = 4

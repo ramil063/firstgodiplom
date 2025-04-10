@@ -59,13 +59,15 @@ func CreateTables(dbr dml.DataBaser) error {
 		status_id  	integer not null,
 		created_at 	timestamp default current_timestamp not null,
     	uploaded_at varchar(64)                         not null,
-    	user_id     integer not null constraint fk_order_user_id references users
+    	user_id     integer not null constraint fk_order_user_id references users,
+		check_accrual_after integer
 	);
 	COMMENT ON COLUMN public.order.id IS 'Идентификатор заказа';
 	COMMENT ON COLUMN public.order.number IS 'Номер заказа';
 	COMMENT ON COLUMN public.order.status_id IS 'Статус заказа';
 	COMMENT ON COLUMN public.order.user_id IS 'Пользователь';
 	COMMENT ON COLUMN public.order.created_at IS 'Дата создания записи';
+	COMMENT ON COLUMN public.order.check_accrual_after IS 'Не проверять в сервисе акруал до этой даты';
 
 	        --STATUS
 	CREATE TABLE IF NOT EXISTS public.status

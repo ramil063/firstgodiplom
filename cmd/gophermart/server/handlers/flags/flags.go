@@ -9,7 +9,7 @@ import (
 )
 
 var RunAddress = "localhost:8080"
-var AccrualSystemAddress = "localhost:8080"
+var AccrualSystemAddress = "http://localhost:8081"
 var DatabaseURI = ""
 
 type EnvVars struct {
@@ -21,7 +21,7 @@ type EnvVars struct {
 func ParseFlags() {
 	flag.StringVar(&RunAddress, "a", "localhost:8080", "address and port to run server")
 	flag.StringVar(&DatabaseURI, "d", "", "database URI")
-	flag.StringVar(&AccrualSystemAddress, "r", "localhost:8081", "address and port to run accrual server")
+	flag.StringVar(&AccrualSystemAddress, "r", "http://localhost:8081", "address and port to run accrual server")
 	flag.Parse()
 
 	var ev EnvVars
