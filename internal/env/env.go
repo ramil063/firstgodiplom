@@ -13,11 +13,11 @@ func InitEnvironmentVariables() {
 	// Загрузка .env файла
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Println("Error loading .env file")
 	}
 
 	// Получение переменных
 	AppEnv = os.Getenv("APP_ENV")
 
-	log.Printf("env: %s:%s", AppEnv)
+	log.Printf("env: %s", AppEnv)
 }
