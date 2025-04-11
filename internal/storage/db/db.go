@@ -80,10 +80,10 @@ func CreateTables(dbr dml.DataBaser) error {
 	COMMENT ON COLUMN public.status.alias IS 'Псевдоним статуса';
 	COMMENT ON COLUMN public.status.name IS 'Название статуса';
 	TRUNCATE TABLE public.status;
-	INSERT INTO public.status (id, alias, name) VALUES (2, 'processing', 'вознаграждение за заказ рассчитывается');
-	INSERT INTO public.status (id, alias, name) VALUES (4, 'processed', 'данные по заказу проверены и информация о расчёте успешно получена');
-	INSERT INTO public.status (id, alias, name) VALUES (1, 'new', 'заказ загружен в систему');
-	INSERT INTO public.status (id, alias, name) VALUES (3, 'invalid', 'система расчёта вознаграждений отказала в расчёте');
+	INSERT INTO public.status (id, alias, name) VALUES (2, 'PROCESSING', 'вознаграждение за заказ рассчитывается');
+	INSERT INTO public.status (id, alias, name) VALUES (4, 'PROCESSED', 'данные по заказу проверены и информация о расчёте успешно получена');
+	INSERT INTO public.status (id, alias, name) VALUES (1, 'NEW', 'заказ загружен в систему');
+	INSERT INTO public.status (id, alias, name) VALUES (3, 'INVALID', 'система расчёта вознаграждений отказала в расчёте');
 
 	        --WITHDRAW
 	CREATE TABLE IF NOT EXISTS public.withdraw
