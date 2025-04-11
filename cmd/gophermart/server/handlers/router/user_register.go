@@ -70,6 +70,7 @@ func userRegister(rw http.ResponseWriter, r *http.Request, s storage.Storager) {
 	}
 
 	rw.Header().Set("Content-Type", "application/json")
+	rw.Header().Set("Authorization", "Bearer "+t.Token)
 	rw.WriteHeader(http.StatusOK)
 	rw.Header().Set("Content-Type", "application/json")
 

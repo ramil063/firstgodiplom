@@ -2,12 +2,13 @@ package db
 
 import (
 	"errors"
+	orderConstants "github.com/ramil063/firstgodiplom/internal/constants/order"
+	"github.com/ramil063/firstgodiplom/internal/env"
 	"time"
 
 	accrualStorage "github.com/ramil063/firstgodiplom/cmd/gophermart/agent/accrual/storage"
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage/models/auth"
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage/models/user"
-	orderConstants "github.com/ramil063/firstgodiplom/internal/constants/order"
 	statusConstants "github.com/ramil063/firstgodiplom/internal/constants/status"
 	"github.com/ramil063/firstgodiplom/internal/logger"
 	"github.com/ramil063/firstgodiplom/internal/storage/db/dml"
@@ -60,7 +61,10 @@ func (s *Storage) UpdateOrderAccrual(orderFromAccrual accrualStorage.Order) erro
 
 func (s *Storage) UpdateOrderCheckAccrualAfter(orderNumber string) error {
 
-	checkAfterUnix := time.Now().Unix() + orderConstants.CheckAccrualAfterSeconds
+	checkAfterUnix := time.Now().Unix()
+	if env.AppEnv == "PROD" {
+		checkAfterUnix += orderConstants.CheckAccrualAfterSeconds
+	}
 	result, err := dml.UpdateOrderCheckAccrualAfter(&dml.DBRepository, orderNumber, checkAfterUnix)
 
 	if err != nil {
