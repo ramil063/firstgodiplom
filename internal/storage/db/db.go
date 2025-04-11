@@ -55,7 +55,7 @@ func CreateTables(dbr dml.DataBaser) error {
 	(
 		id         	serial not null constraint pk_order_id primary key,
 		number     	varchar(64) not null constraint uidx_order_number unique,
-		accrual     integer not null,
+		accrual     double precision default 0 not null,
 		status_id  	integer not null,
 		created_at 	timestamp default current_timestamp not null,
     	uploaded_at varchar(64)                         not null,
@@ -89,7 +89,7 @@ func CreateTables(dbr dml.DataBaser) error {
 	CREATE TABLE IF NOT EXISTS public.withdraw
 	(
 		id           serial not null constraint pk_withdraw_id primary key,
-		sum          integer not null,
+		sum          double precision default 0 not null,
 		order_id     integer not null constraint fk_withdraw_order_id references public.order,
 		processed_at varchar(100) not null,
 		created_at   timestamp default current_timestamp not null

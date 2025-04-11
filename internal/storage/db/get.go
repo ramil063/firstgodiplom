@@ -37,7 +37,7 @@ func (s *Storage) GetOrder(number string) (user.Order, error) {
 	var o user.Order
 	row := dml.DBRepository.QueryRowContext(
 		context.Background(),
-		`SELECT o.id, number, accrual, s.alias, uploaded_at, u.login
+		`SELECT o.id, number, accrual::DOUBLE PRECISION, s.alias, uploaded_at, u.login
 				FROM "order" o
 				LEFT JOIN users u ON u.id = o.user_id
 				LEFT JOIN status s ON s.id = o.status_id
@@ -51,7 +51,7 @@ func (s *Storage) GetOrders(login string) ([]user.Order, error) {
 	var res []user.Order
 	rows, err := dml.DBRepository.QueryContext(
 		context.Background(),
-		`SELECT number, accrual, s.alias, uploaded_at
+		`SELECT number, accrual::DOUBLE PRECISION, s.alias, uploaded_at
 				FROM "order" o
 				LEFT JOIN users u ON u.id = o.user_id
 				LEFT JOIN status s ON s.id = o.status_id
@@ -62,7 +62,7 @@ func (s *Storage) GetOrders(login string) ([]user.Order, error) {
 	}
 	defer rows.Close()
 
-	var accrual int
+	var accrual float32
 	var number, status, uploadedAt string
 	for rows.Next() {
 		err = rows.Scan(&number, &accrual, &status, &uploadedAt)
@@ -90,7 +90,7 @@ func (s *Storage) GetAllOrdersInStatuses(statuses []int) ([]user.OrderCheckAccru
 
 	rows, err := dml.DBRepository.QueryContext(
 		context.Background(),
-		`SELECT number, accrual, s.alias
+		`SELECT number, accrual::DOUBLE PRECISION, s.alias
 				FROM "order" o
 				LEFT JOIN status s ON s.id = o.status_id
 				WHERE status_id = ANY($1)
@@ -104,7 +104,7 @@ func (s *Storage) GetAllOrdersInStatuses(statuses []int) ([]user.OrderCheckAccru
 	}
 	defer rows.Close()
 
-	var accrual int
+	var accrual float32
 	var number, status string
 	for rows.Next() {
 		err = rows.Scan(&number, &accrual, &status)

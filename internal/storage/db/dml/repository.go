@@ -125,7 +125,7 @@ func UpdateToken(dbr *Repository, login string, token string, expiredAt int64) (
 	return exec, nil
 }
 
-func AddOrder(dbr *Repository, number string, accrual int, statusID int, uploadedAt string, userID int) (pgconn.CommandTag, error) {
+func AddOrder(dbr *Repository, number string, accrual float32, statusID int, uploadedAt string, userID int) (pgconn.CommandTag, error) {
 	exec, err := dbr.ExecContext(
 		context.Background(),
 		`INSERT INTO "order" (number, accrual, status_id, uploaded_at, user_id) VALUES ($1, $2, $3, $4, $5)`,
@@ -179,7 +179,7 @@ func MinusBalance(tx pgx.Tx, sum int, login string) (pgconn.CommandTag, error) {
 	return exec, nil
 }
 
-func UpdateOrderAccrual(dbr *Repository, number string, accrual int, statusID int) (pgconn.CommandTag, error) {
+func UpdateOrderAccrual(dbr *Repository, number string, accrual float32, statusID int) (pgconn.CommandTag, error) {
 	exec, err := dbr.ExecContext(
 		context.Background(),
 		`
