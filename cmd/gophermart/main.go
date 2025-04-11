@@ -7,6 +7,7 @@ import (
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/handlers/flags"
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/handlers/router"
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage"
+	"github.com/ramil063/firstgodiplom/internal/env"
 	"github.com/ramil063/firstgodiplom/internal/logger"
 	"github.com/ramil063/firstgodiplom/internal/storage/db"
 	"github.com/ramil063/firstgodiplom/internal/storage/db/dml"
@@ -19,6 +20,7 @@ func main() {
 		panic(err)
 	}
 	flags.ParseFlags()
+	env.InitEnvironmentVariables()
 
 	logger.WriteInfoLog("--------------START SERVER-------------")
 

@@ -41,7 +41,7 @@ func CreateTables(dbr dml.DataBaser) error {
 		login    	varchar(100) not null constraint uidx_users_login unique,
 		password 	varchar(100) not null,
 		access_token            varchar(100),
-		access_token_expired_at timestamp
+		access_token_expired_at integer
 	);
 	COMMENT ON COLUMN public.users.id IS 'Идентификатор пользователя';
 	COMMENT ON COLUMN public.users.name IS 'Имя пользователя';

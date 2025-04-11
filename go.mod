@@ -5,10 +5,10 @@ go 1.23.1
 require (
 	github.com/caarlos0/env/v6 v6.10.1
 	github.com/go-chi/chi/v5 v5.2.1
-	github.com/hIMEI29A/goluhn v0.1.0
 	github.com/jackc/pgconn v1.14.3
 	github.com/jackc/pgerrcode v0.0.0-20240316143900-6e2875d9b438
 	github.com/jackc/pgx/v4 v4.18.3
+	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.2
 	github.com/stretchr/testify v1.10.0
 	github.com/theplant/luhn v0.0.0-20170224032821-81a1a381387a

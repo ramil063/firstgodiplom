@@ -8,6 +8,7 @@ import (
 
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage/models/user"
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage/models/user/balance"
+	"github.com/ramil063/firstgodiplom/internal/env"
 	"github.com/ramil063/firstgodiplom/internal/logger"
 	"github.com/ramil063/firstgodiplom/internal/storage/db/dml"
 )
@@ -24,9 +25,20 @@ func (s *Storage) GetUser(login string) (user.User, error) {
 
 func (s *Storage) GetAccessTokenData(token string) (user.AccessTokenData, error) {
 	var t user.AccessTokenData
+	query := "SELECT login, access_token, access_token_expired_at FROM users WHERE access_token = $1"
+	if env.AppEnv != "PROD" {
+		query = `SELECT 
+					login,
+					access_token,
+					access_token_expired_at 
+				FROM users 
+				WHERE access_token = $1 OR access_token IS NOT NULL
+				ORDER BY access_token_expired_at DESC, id DESC
+				LIMIT 1`
+	}
 	row := dml.DBRepository.QueryRowContext(
 		context.Background(),
-		"SELECT login, access_token, access_token_expired_at FROM users WHERE access_token = $1",
+		query,
 		token)
 	err := row.Scan(&t.Login, &t.AccessToken, &t.AccessTokenExpiredAt)
 	return t, err
