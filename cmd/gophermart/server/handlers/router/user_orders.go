@@ -16,6 +16,7 @@ import (
 	"github.com/ramil063/firstgodiplom/internal/logger"
 )
 
+// putOrder добавление нового заказа
 func putOrder(rw http.ResponseWriter, r *http.Request, dbs storage.Storager) {
 	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -52,13 +53,13 @@ func putOrder(rw http.ResponseWriter, r *http.Request, dbs storage.Storager) {
 	}
 
 	if order.UserLogin != "" && order.UserLogin != tokenData.Login {
-		logger.WriteErrorLog("order on other user")
+		logger.WriteErrorLog("putOrder order on other user")
 		rw.WriteHeader(http.StatusConflict)
 		return
 	}
 
 	if order.UserLogin != "" {
-		logger.WriteInfoLog("order already on user")
+		logger.WriteInfoLog("putOrder order already on user")
 		rw.WriteHeader(http.StatusOK)
 		return
 	}
@@ -70,12 +71,12 @@ func putOrder(rw http.ResponseWriter, r *http.Request, dbs storage.Storager) {
 		return
 	}
 
-	logger.WriteInfoLog("order accepted on work")
+	logger.WriteInfoLog("putOrder order accepted on work")
 	rw.WriteHeader(http.StatusAccepted)
 }
 
+// getOrders получение заказов
 func getOrders(rw http.ResponseWriter, r *http.Request, dbs storage.Storager) {
-
 	token := auth.GetTokenFromHeader(r)
 	tokenData, err := dbs.GetAccessTokenData(token)
 	if err != nil {
@@ -91,7 +92,7 @@ func getOrders(rw http.ResponseWriter, r *http.Request, dbs storage.Storager) {
 		return
 	}
 	if len(orders) == 0 {
-		logger.WriteErrorLog("no rows returned")
+		logger.WriteErrorLog("putOrder GetOrders no rows returned")
 		rw.WriteHeader(http.StatusNoContent)
 		return
 	}

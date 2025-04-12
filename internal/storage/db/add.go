@@ -18,6 +18,7 @@ import (
 	withdrawRepository "github.com/ramil063/firstgodiplom/internal/storage/db/dml/withdraw"
 )
 
+// AddUserData добавить пользователя и добавить его баланс
 func (s *Storage) AddUserData(register user.Register, passwordHash string) error {
 
 	tx, err := repository.DBRepository.Pool.BeginTx(context.Background(), pgx.TxOptions{})
@@ -68,6 +69,7 @@ func (s *Storage) AddUserData(register user.Register, passwordHash string) error
 	return nil
 }
 
+// AddOrder добавить заказ
 func (s *Storage) AddOrder(number string, tokenData user.AccessTokenData) error {
 
 	u, err := s.GetUser(tokenData.Login)
@@ -96,6 +98,7 @@ func (s *Storage) AddOrder(number string, tokenData user.AccessTokenData) error 
 	return nil
 }
 
+// AddWithdraw добавить списание баллов
 func (s *Storage) AddWithdraw(withdraw balance.Withdraw, login string) error {
 
 	now := time.Now()

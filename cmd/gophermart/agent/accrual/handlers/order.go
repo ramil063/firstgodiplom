@@ -15,6 +15,7 @@ import (
 	"github.com/ramil063/firstgodiplom/internal/logger"
 )
 
+// OrdersProcess запускает основную горутину для проверки заказов в сервисе акруал
 func OrdersProcess(c Clienter, s storage.Storager) {
 
 	duration := time.Duration(accrualStorage.OrderCheckTickerTimeInterval)
@@ -23,6 +24,7 @@ func OrdersProcess(c Clienter, s storage.Storager) {
 	go ProcessAccrual(c, s, ticker)
 }
 
+// ProcessAccrual опрашивает каждый интервал времени сервис акруал
 func ProcessAccrual(c Clienter, s storage.Storager, ticker *time.Ticker) {
 	defer ticker.Stop()
 	retryAfterChan := make(chan int, 1)
@@ -55,6 +57,7 @@ func ProcessAccrual(c Clienter, s storage.Storager, ticker *time.Ticker) {
 	}
 }
 
+// SyncAccrual отправляет запрос в акруал и обрабатывает ответ от него
 func SyncAccrual(c Clienter, url string, ordersCh chan user.OrderCheckAccrual, s storage.Storager, worker int, retryAfterChan chan int) {
 	ordersCheckURL := url + "/api/orders/"
 

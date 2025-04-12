@@ -6,9 +6,6 @@ import (
 	"net/http"
 )
 
-type Requester interface {
-}
-
 type Clienter interface {
 	NewRequest(method string, url string) (*http.Request, error)
 	SendRequest(method string, url string, body []byte) (int, io.ReadCloser, http.Header, error)
@@ -18,20 +15,14 @@ type client struct {
 	httpClient *http.Client
 }
 
-type request struct {
-}
-
+// NewClient создание нового клиента
 func NewClient() Clienter {
 	return client{
 		httpClient: &http.Client{},
 	}
 }
 
-func NewRequest() Requester {
-	return request{}
-}
-
-// SendRequest отправка пост запроса с телом
+// SendRequest отправка запроса
 func (c client) SendRequest(method string, url string, body []byte) (int, io.ReadCloser, http.Header, error) {
 
 	req, err := http.NewRequest(method, url, bytes.NewReader(body))

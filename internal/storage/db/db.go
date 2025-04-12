@@ -10,6 +10,7 @@ import (
 
 type Storage struct{}
 
+// Init инициализация таблиц бд и проверка соединения
 func Init(dbr repository.DataBaser) error {
 	var err error
 
@@ -22,6 +23,7 @@ func Init(dbr repository.DataBaser) error {
 	return err
 }
 
+// CheckPing проверка соединения с бд
 func CheckPing(dbr repository.DataBaser) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
@@ -29,6 +31,7 @@ func CheckPing(dbr repository.DataBaser) error {
 	return dbr.PingContext(ctx)
 }
 
+// CreateTables создание основных таблиц
 func CreateTables(dbr repository.DataBaser) error {
 	var err error
 

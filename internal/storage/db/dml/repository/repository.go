@@ -16,6 +16,7 @@ type Repository struct {
 	Pool *pgxpool.Pool
 }
 
+// DataBaser основные команды для работы с бд
 type DataBaser interface {
 	ExecContext(ctx context.Context, query string, args ...any) (pgconn.CommandTag, error)
 	QueryRowContext(ctx context.Context, query string, args ...any) pgx.Row
@@ -49,6 +50,7 @@ func (dbr *Repository) QueryContext(ctx context.Context, query string, args ...a
 	return rows, nil
 }
 
+// Open открыть соединение с бд
 func (dbr *Repository) Open() (*pgxpool.Pool, error) {
 	config, err := pgxpool.ParseConfig(flags.DatabaseURI)
 	if err != nil {
@@ -67,6 +69,7 @@ func (dbr *Repository) Open() (*pgxpool.Pool, error) {
 	return pool, nil
 }
 
+// PingContext проверить соединение с бд
 func (dbr *Repository) PingContext(ctx context.Context) error {
 	err := dbr.Pool.Ping(ctx)
 	if err != nil {
@@ -75,6 +78,7 @@ func (dbr *Repository) PingContext(ctx context.Context) error {
 	return err
 }
 
+// SetPool установить поле Pool для работы с бд
 func (dbr *Repository) SetPool() error {
 	pool, err := dbr.Open()
 	if err != nil {

@@ -19,6 +19,7 @@ import (
 	userRepository "github.com/ramil063/firstgodiplom/internal/storage/db/dml/user"
 )
 
+// UpdateToken обновить токен авторизации
 func (s *Storage) UpdateToken(login string, t auth.Token, expiredAt int64) error {
 
 	result, err := userRepository.UpdateToken(&repository.DBRepository, login, t.Token, expiredAt)
@@ -39,12 +40,9 @@ func (s *Storage) UpdateToken(login string, t auth.Token, expiredAt int64) error
 	return nil
 }
 
+// UpdateOrderAccrual обновить данные по начислению данных в заказе
 func (s *Storage) UpdateOrderAccrual(orderFromAccrual accrualStorage.Order) error {
 
-	order, err := s.GetOrder(orderFromAccrual.Order)
-	if err != nil {
-		return err
-	}
 	internalOrderStatus := statusConstants.AccrualStatusesOrderStatusesMap[orderFromAccrual.Status]
 
 	tx, err := repository.DBRepository.Pool.BeginTx(context.Background(), pgx.TxOptions{})
@@ -52,7 +50,7 @@ func (s *Storage) UpdateOrderAccrual(orderFromAccrual accrualStorage.Order) erro
 		return err
 	}
 
-	resultUpdateOrderAccrual, err := orderRepository.UpdateOrderAccrual(tx, order.Number, orderFromAccrual.Accrual, internalOrderStatus)
+	resultUpdateOrderAccrual, err := orderRepository.UpdateOrderAccrual(tx, orderFromAccrual.Order, orderFromAccrual.Accrual, internalOrderStatus)
 	if err != nil {
 		_ = tx.Rollback(context.Background())
 		return err
@@ -69,7 +67,7 @@ func (s *Storage) UpdateOrderAccrual(orderFromAccrual accrualStorage.Order) erro
 		return errors.New("expected to affect 1 row")
 	}
 
-	orderEntity, err := orderRepository.GetOrder(tx, order.Number)
+	orderEntity, err := orderRepository.GetOrder(tx, orderFromAccrual.Order)
 	if err != nil {
 		_ = tx.Rollback(context.Background())
 		logger.WriteErrorLog("GetOrder error in sql")
@@ -109,6 +107,7 @@ func (s *Storage) UpdateOrderAccrual(orderFromAccrual accrualStorage.Order) erro
 	return err
 }
 
+// UpdateOrderCheckAccrualAfter обновить дату повторного запроса данных заказа в акруал
 func (s *Storage) UpdateOrderCheckAccrualAfter(orderNumber string) error {
 
 	checkAfterUnix := time.Now().Unix()
@@ -121,13 +120,13 @@ func (s *Storage) UpdateOrderCheckAccrualAfter(orderNumber string) error {
 		return err
 	}
 	if result == nil {
-		logger.WriteErrorLog("error in sql empty result")
+		logger.WriteErrorLog("UpdateOrderCheckAccrualAfter error in sql empty result")
 		return errors.New("error in sql empty result")
 	}
 
 	rows := result.RowsAffected()
 	if rows != 1 {
-		logger.WriteErrorLog("error expected to affect 1 row")
+		logger.WriteErrorLog("UpdateOrderCheckAccrualAfter error expected to affect 1 row")
 		return errors.New("expected to affect 1 row")
 	}
 	return nil

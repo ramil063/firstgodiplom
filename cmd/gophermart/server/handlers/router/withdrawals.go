@@ -9,8 +9,8 @@ import (
 	"github.com/ramil063/firstgodiplom/internal/logger"
 )
 
+// getWithdrawals получение списаний баллов с баланса
 func getWithdrawals(rw http.ResponseWriter, r *http.Request, dbs storage.Storager) {
-
 	token := auth.GetTokenFromHeader(r)
 	tokenData, err := dbs.GetAccessTokenData(token)
 	if err != nil {

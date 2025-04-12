@@ -14,7 +14,7 @@ import (
 	"github.com/ramil063/firstgodiplom/internal/logger"
 )
 
-// Home метод получения данных из всех метрик
+// userRegister регистрация пользователя
 func userRegister(rw http.ResponseWriter, r *http.Request, s storage.Storager) {
 	var register user.Register
 	dec := json.NewDecoder(r.Body)

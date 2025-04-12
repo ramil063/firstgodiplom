@@ -13,6 +13,7 @@ import (
 	"github.com/ramil063/firstgodiplom/internal/logger"
 )
 
+// AddWithdraw добавление списания средств с баланса
 func AddWithdraw(rw http.ResponseWriter, r *http.Request, dbs storage.Storager) {
 	var withdraw balanceData.Withdraw
 	dec := json.NewDecoder(r.Body)

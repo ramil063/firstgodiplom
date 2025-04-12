@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 )
 
+// RandomHex рандомный набор символов
 func RandomHex(n int) (string, error) {
 	bytes := make([]byte, n)
 	if _, err := rand.Read(bytes); err != nil {

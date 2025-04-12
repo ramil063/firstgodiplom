@@ -12,6 +12,7 @@ import (
 	"github.com/ramil063/firstgodiplom/internal/storage/db/dml/repository"
 )
 
+// AddUser добавить пользователя
 func AddUser(tx pgx.Tx, login string, password string, name string) (pgconn.CommandTag, error) {
 	exec, err := tx.Exec(
 		context.Background(),
@@ -30,6 +31,7 @@ func AddUser(tx pgx.Tx, login string, password string, name string) (pgconn.Comm
 	return exec, nil
 }
 
+// UpdateToken обновить токен авторизации пользователя
 func UpdateToken(dbr *repository.Repository, login string, token string, expiredAt int64) (pgconn.CommandTag, error) {
 	exec, err := dbr.ExecContext(
 		context.Background(),

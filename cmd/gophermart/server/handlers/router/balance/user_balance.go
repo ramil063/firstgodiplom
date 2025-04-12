@@ -9,6 +9,7 @@ import (
 	"github.com/ramil063/firstgodiplom/internal/logger"
 )
 
+// GetBalance получение баланса пользователя
 func GetBalance(rw http.ResponseWriter, r *http.Request, dbs storage.Storager) {
 
 	token := auth.GetTokenFromHeader(r)

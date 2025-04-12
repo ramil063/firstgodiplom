@@ -15,7 +15,7 @@ import (
 	"github.com/ramil063/firstgodiplom/internal/logger"
 )
 
-// Home метод получения данных из всех метрик
+// userLogin авторизация пользователя
 func userLogin(rw http.ResponseWriter, r *http.Request, dbs storage.Storager) {
 	var login user.Login
 	dec := json.NewDecoder(r.Body)
@@ -62,5 +62,5 @@ func userLogin(rw http.ResponseWriter, r *http.Request, dbs storage.Storager) {
 		return
 	}
 
-	logger.WriteDebugLog("sending HTTP 200 response")
+	logger.WriteDebugLog("user login successfully:" + login.Login)
 }

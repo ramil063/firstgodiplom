@@ -14,6 +14,7 @@ import (
 	"github.com/ramil063/firstgodiplom/internal/hash"
 )
 
+// AuthenticateUser аутентифицировать пользователя
 func AuthenticateUser(s storage.Storager, login string) (auth.Token, error) {
 	var err error
 	var t auth.Token
@@ -28,6 +29,7 @@ func AuthenticateUser(s storage.Storager, login string) (auth.Token, error) {
 	return t, err
 }
 
+// CheckAuthenticatedUser проверка пользователя на аутентификацию
 func CheckAuthenticatedUser(s storage.Storager, token string) error {
 	var err error
 	tokenData, err := s.GetAccessTokenData(token)
@@ -42,6 +44,7 @@ func CheckAuthenticatedUser(s storage.Storager, token string) error {
 	return err
 }
 
+// GetTokenFromHeader получить токен из хедера
 func GetTokenFromHeader(r *http.Request) string {
 	authorization := r.Header.Get("Authorization")
 	return strings.TrimSpace(strings.Replace(authorization, "Bearer", "", 1))

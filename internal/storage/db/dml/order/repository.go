@@ -13,6 +13,7 @@ import (
 	"github.com/ramil063/firstgodiplom/internal/storage/db/dml/repository"
 )
 
+// AddOrder добавление заказа
 func AddOrder(dbr *repository.Repository, number string, accrual float32, statusID int, uploadedAt string, userID int) (pgconn.CommandTag, error) {
 	exec, err := dbr.ExecContext(
 		context.Background(),
@@ -33,6 +34,7 @@ func AddOrder(dbr *repository.Repository, number string, accrual float32, status
 	return exec, nil
 }
 
+// UpdateOrderAccrual обновление начисления в заказе
 func UpdateOrderAccrual(tx pgx.Tx, number string, accrual float32, statusID int) (pgconn.CommandTag, error) {
 	exec, err := tx.Exec(
 		context.Background(),
@@ -50,6 +52,7 @@ func UpdateOrderAccrual(tx pgx.Tx, number string, accrual float32, statusID int)
 	return exec, nil
 }
 
+// UpdateOrderCheckAccrualAfter обновление поля даты следующей проверки заказа в акруал
 func UpdateOrderCheckAccrualAfter(dbr *repository.Repository, number string, checkAccrualAfter int64) (pgconn.CommandTag, error) {
 	exec, err := dbr.ExecContext(
 		context.Background(),
@@ -66,6 +69,7 @@ func UpdateOrderCheckAccrualAfter(dbr *repository.Repository, number string, che
 	return exec, nil
 }
 
+// GetOrder получение заказа
 func GetOrder(tx pgx.Tx, number string) (user.Order, error) {
 	var o user.Order
 	row := tx.QueryRow(

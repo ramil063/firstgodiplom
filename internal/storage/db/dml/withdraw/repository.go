@@ -7,6 +7,7 @@ import (
 	"github.com/jackc/pgx/v4"
 )
 
+// AddWithdraw добавить списание средств
 func AddWithdraw(tx pgx.Tx, orderNumber string, sum float32, processedAt string, login string) (pgconn.CommandTag, error) {
 	exec, err := tx.Exec(
 		context.Background(),

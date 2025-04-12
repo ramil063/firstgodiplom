@@ -9,6 +9,7 @@ import (
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage/models/user/balance"
 )
 
+// OperatingBalance обновление баланса
 func OperatingBalance(tx pgx.Tx, sum float32, operator string, login string) (pgconn.CommandTag, error) {
 	exec, err := tx.Exec(
 		context.Background(),
@@ -29,6 +30,7 @@ func OperatingBalance(tx pgx.Tx, sum float32, operator string, login string) (pg
 	return exec, nil
 }
 
+// GetBalance получение баланса
 func GetBalance(tx pgx.Tx, login string) (balance.Balance, error) {
 	var b balance.Balance
 	row := tx.QueryRow(
@@ -46,6 +48,7 @@ func GetBalance(tx pgx.Tx, login string) (balance.Balance, error) {
 	return b, err
 }
 
+// AddBalance добавление баланса
 func AddBalance(tx pgx.Tx, login string) (pgconn.CommandTag, error) {
 	exec, err := tx.Exec(
 		context.Background(),

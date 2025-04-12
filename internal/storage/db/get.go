@@ -12,6 +12,7 @@ import (
 	"github.com/ramil063/firstgodiplom/internal/storage/db/dml/repository"
 )
 
+// GetUser получить пользователя
 func (s *Storage) GetUser(login string) (user.User, error) {
 	var u user.User
 	row := repository.DBRepository.QueryRowContext(
@@ -22,6 +23,7 @@ func (s *Storage) GetUser(login string) (user.User, error) {
 	return u, err
 }
 
+// GetAccessTokenData получить данные токена авторизации
 func (s *Storage) GetAccessTokenData(token string) (user.AccessTokenData, error) {
 	var t user.AccessTokenData
 	query := "SELECT login, access_token, access_token_expired_at FROM users WHERE access_token = $1"
@@ -33,6 +35,7 @@ func (s *Storage) GetAccessTokenData(token string) (user.AccessTokenData, error)
 	return t, err
 }
 
+// GetOrder получить заказ
 func (s *Storage) GetOrder(number string) (user.Order, error) {
 	var o user.Order
 	row := repository.DBRepository.QueryRowContext(
@@ -47,6 +50,7 @@ func (s *Storage) GetOrder(number string) (user.Order, error) {
 	return o, err
 }
 
+// GetOrders получить заказы
 func (s *Storage) GetOrders(login string) ([]user.Order, error) {
 	var res []user.Order
 	rows, err := repository.DBRepository.QueryContext(
@@ -85,6 +89,7 @@ func (s *Storage) GetOrders(login string) ([]user.Order, error) {
 	return res, err
 }
 
+// GetAllOrdersInStatuses получить все заказы в статусах
 func (s *Storage) GetAllOrdersInStatuses(statuses []int) ([]user.OrderCheckAccrual, error) {
 	var res []user.OrderCheckAccrual
 
@@ -126,6 +131,7 @@ func (s *Storage) GetAllOrdersInStatuses(statuses []int) ([]user.OrderCheckAccru
 	return res, err
 }
 
+// GetBalance получить баланс пользователя
 func (s *Storage) GetBalance(login string) (balance.Balance, error) {
 	var b balance.Balance
 	row := repository.DBRepository.QueryRowContext(
@@ -143,14 +149,7 @@ func (s *Storage) GetBalance(login string) (balance.Balance, error) {
 	return b, err
 }
 
-func (s *Storage) GetCounter(name string) (int64, error) {
-	row := repository.DBRepository.QueryRowContext(context.Background(), "SELECT value FROM counter WHERE name = $1", name)
-	var selectedValue int64
-	err := row.Scan(&selectedValue)
-
-	return selectedValue, err
-}
-
+// GetWithdrawals получение всех списаний баллов
 func (s *Storage) GetWithdrawals(login string) ([]balance.Withdraw, error) {
 	var res []balance.Withdraw
 	rows, err := repository.DBRepository.QueryContext(
