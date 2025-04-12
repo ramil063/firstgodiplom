@@ -135,8 +135,7 @@ func (s *Storage) GetBalance(login string) (balance.Balance, error) {
 					COALESCE(SUM(w.sum) OVER(PARTITION BY b.id), 0::DOUBLE PRECISION) AS sum
 				FROM balance b
 						 INNER JOIN users u ON u.id = b.user_id
-						 LEFT JOIN public."order" o ON u.id = o.user_id
-						 LEFT JOIN withdraw w ON w.order_id = o.id
+						 LEFT JOIN withdraw w ON w.user_id = b.user_id
 				WHERE u.login = $1
 				LIMIT 1`,
 		login)
@@ -156,10 +155,9 @@ func (s *Storage) GetWithdrawals(login string) ([]balance.Withdraw, error) {
 	var res []balance.Withdraw
 	rows, err := dml.DBRepository.QueryContext(
 		context.Background(),
-		`SELECT o.number, "sum", processed_at
+		`SELECT "order", "sum", processed_at
 				FROM withdraw w
-				LEFT JOIN "order" o ON w.order_id = o.id
-				LEFT JOIN users u ON u.id = o.user_id
+				INNER JOIN users u ON u.id = w.user_id
 				WHERE u.login = $1
 				ORDER BY processed_at DESC`,
 		login)

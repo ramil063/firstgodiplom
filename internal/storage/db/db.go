@@ -89,14 +89,16 @@ func CreateTables(dbr dml.DataBaser) error {
 	CREATE TABLE IF NOT EXISTS public.withdraw
 	(
 		id           serial not null constraint pk_withdraw_id primary key,
+		"order"    	 varchar(64) not null,
 		sum          double precision default 0 not null,
-		order_id     integer not null constraint fk_withdraw_order_id references public.order,
+		user_id      integer not null constraint fk_withdraw_user_id references public.users,
 		processed_at varchar(100) not null,
 		created_at   timestamp default current_timestamp not null
 	);
 	COMMENT ON COLUMN public.withdraw.id IS 'Идентификатор списания';
 	COMMENT ON COLUMN public.withdraw.sum IS 'Сумма списания';
-	COMMENT ON COLUMN public.withdraw.order_id IS 'Заказ';
+	COMMENT ON COLUMN public.withdraw."order" IS 'Заказ';
+	COMMENT ON COLUMN public.withdraw.user_id IS 'Пользователь';
 	COMMENT ON COLUMN public.withdraw.processed_at IS 'Дата списания';
 	COMMENT ON COLUMN public.withdraw.created_at IS 'Дата создания записи';
 

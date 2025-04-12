@@ -147,13 +147,14 @@ func AddOrder(dbr *Repository, number string, accrual float32, statusID int, upl
 	return exec, nil
 }
 
-func AddWithdraw(tx pgx.Tx, orderID int, sum float32, processedAt string) (pgconn.CommandTag, error) {
+func AddWithdraw(tx pgx.Tx, orderNumber string, sum float32, processedAt string, login string) (pgconn.CommandTag, error) {
 	exec, err := tx.Exec(
 		context.Background(),
-		`INSERT INTO withdraw (sum, order_id, processed_at) VALUES ($1, $2, $3)`,
+		`INSERT INTO withdraw (sum, "order", processed_at, user_id) VALUES ($1, $2, $3, (SELECT id FROM users WHERE login = $4))`,
 		sum,
-		orderID,
-		processedAt)
+		orderNumber,
+		processedAt,
+		login)
 	return exec, err
 }
 

@@ -2,11 +2,9 @@ package balance
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 	"strconv"
 
-	"github.com/jackc/pgx/v4"
 	"github.com/theplant/luhn"
 
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/handlers/auth"
@@ -44,13 +42,6 @@ func AddWithdraw(rw http.ResponseWriter, r *http.Request, dbs storage.Storager) 
 
 	if !luhn.Valid(num) {
 		logger.WriteErrorLog("wrong format luhn number")
-		rw.WriteHeader(http.StatusUnprocessableEntity)
-		return
-	}
-
-	_, err = dbs.GetOrder(withdraw.OrderNumber)
-	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
-		logger.WriteErrorLog(err.Error())
 		rw.WriteHeader(http.StatusUnprocessableEntity)
 		return
 	}

@@ -94,11 +94,6 @@ func (s *Storage) AddOrder(number string, tokenData user.AccessTokenData) error 
 
 func (s *Storage) AddWithdraw(withdraw balance.Withdraw, login string) error {
 
-	order, err := s.GetOrder(withdraw.OrderNumber)
-	if err != nil {
-		return err
-	}
-
 	now := time.Now()
 	rfc3339Time := now.Format(time.RFC3339)
 
@@ -107,7 +102,7 @@ func (s *Storage) AddWithdraw(withdraw balance.Withdraw, login string) error {
 		return err
 	}
 
-	result, err := dml.AddWithdraw(tx, order.ID, withdraw.Sum, rfc3339Time)
+	result, err := dml.AddWithdraw(tx, withdraw.OrderNumber, withdraw.Sum, rfc3339Time, login)
 	if err != nil {
 		errTx := tx.Rollback(context.Background())
 		if errTx != nil {
