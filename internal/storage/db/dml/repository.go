@@ -10,6 +10,8 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/handlers/flags"
+	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage/models/user"
+	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage/models/user/balance"
 	internalErrors "github.com/ramil063/firstgodiplom/internal/errors"
 	"github.com/ramil063/firstgodiplom/internal/logger"
 )
@@ -93,8 +95,8 @@ func NewRepository() (*Repository, error) {
 	return rep, err
 }
 
-func AddUser(dbr *Repository, login string, password string, name string) (pgconn.CommandTag, error) {
-	exec, err := dbr.ExecContext(
+func AddUser(tx pgx.Tx, login string, password string, name string) (pgconn.CommandTag, error) {
+	exec, err := tx.Exec(
 		context.Background(),
 		"INSERT INTO users (login, password, name) VALUES ($1, $2, $3)",
 		login,
@@ -145,26 +147,22 @@ func AddOrder(dbr *Repository, number string, accrual float32, statusID int, upl
 	return exec, nil
 }
 
-func AddWithdraw(tx pgx.Tx, orderID int, sum int, processedAt string) (pgconn.CommandTag, error) {
+func AddWithdraw(tx pgx.Tx, orderID int, sum float32, processedAt string) (pgconn.CommandTag, error) {
 	exec, err := tx.Exec(
 		context.Background(),
 		`INSERT INTO withdraw (sum, order_id, processed_at) VALUES ($1, $2, $3)`,
 		sum,
 		orderID,
 		processedAt)
-
-	if err != nil {
-		return nil, err
-	}
-	return exec, nil
+	return exec, err
 }
 
-func MinusBalance(tx pgx.Tx, sum int, login string) (pgconn.CommandTag, error) {
+func OperatingBalance(tx pgx.Tx, sum float32, operator string, login string) (pgconn.CommandTag, error) {
 	exec, err := tx.Exec(
 		context.Background(),
 		`
 			UPDATE balance 
-			SET "value" = "value" - $1 
+			SET "value" = "value" `+operator+` $1 
 			WHERE user_id = (
 				SELECT id 
 				FROM users 
@@ -179,8 +177,8 @@ func MinusBalance(tx pgx.Tx, sum int, login string) (pgconn.CommandTag, error) {
 	return exec, nil
 }
 
-func UpdateOrderAccrual(dbr *Repository, number string, accrual float32, statusID int) (pgconn.CommandTag, error) {
-	exec, err := dbr.ExecContext(
+func UpdateOrderAccrual(tx pgx.Tx, number string, accrual float32, statusID int) (pgconn.CommandTag, error) {
+	exec, err := tx.Exec(
 		context.Background(),
 		`
 			UPDATE "order" 
@@ -210,4 +208,45 @@ func UpdateOrderCheckAccrualAfter(dbr *Repository, number string, checkAccrualAf
 		return nil, err
 	}
 	return exec, nil
+}
+
+func GetOrder(tx pgx.Tx, number string) (user.Order, error) {
+	var o user.Order
+	row := tx.QueryRow(
+		context.Background(),
+		`SELECT o.id, number, accrual::DOUBLE PRECISION, s.alias, uploaded_at, u.login
+				FROM "order" o
+				LEFT JOIN users u ON u.id = o.user_id
+				LEFT JOIN status s ON s.id = o.status_id
+				WHERE number = $1`,
+		number)
+
+	err := row.Scan(&o.ID, &o.Number, &o.Accrual, &o.Status, &o.UploadedAt, &o.UserLogin)
+	return o, err
+}
+
+func GetBalance(tx pgx.Tx, login string) (balance.Balance, error) {
+	var b balance.Balance
+	row := tx.QueryRow(
+		context.Background(),
+		`SELECT b.id,
+					   "value"::DOUBLE PRECISION as balance,
+					   COALESCE(sum(w.sum) OVER (PARTITION BY b.id), 0::DOUBLE PRECISION) as sum
+				FROM balance b
+						 LEFT JOIN users u ON u.id = b.user_id
+						 LEFT JOIN public."order" o on u.id = o.user_id
+						 LEFT JOIN withdraw w ON w.order_id = o.id
+				WHERE u.login = $1
+				LIMIT 1`,
+		login)
+	err := row.Scan(&b.ID, &b.Current, &b.Withdrawn)
+	return b, err
+}
+
+func AddBalance(tx pgx.Tx, login string) (pgconn.CommandTag, error) {
+	exec, err := tx.Exec(
+		context.Background(),
+		"INSERT INTO balance (user_id) (SELECT id FROM users WHERE login = $1)",
+		login)
+	return exec, err
 }

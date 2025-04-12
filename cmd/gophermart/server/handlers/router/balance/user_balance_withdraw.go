@@ -70,7 +70,7 @@ func AddWithdraw(rw http.ResponseWriter, r *http.Request, dbs storage.Storager) 
 		return
 	}
 
-	if balance.Current < float64(withdraw.Sum) {
+	if balance.Current < withdraw.Sum {
 		logger.WriteErrorLog("not enough balance")
 		rw.WriteHeader(http.StatusPaymentRequired)
 		return

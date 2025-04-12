@@ -130,13 +130,15 @@ func (s *Storage) GetBalance(login string) (balance.Balance, error) {
 	var b balance.Balance
 	row := dml.DBRepository.QueryRowContext(
 		context.Background(),
-		`SELECT max("value") as balance, sum(w.sum) as sum
+		`SELECT
+					"value"::DOUBLE PRECISION AS balance,
+					COALESCE(SUM(w.sum) OVER(PARTITION BY b.id), 0::DOUBLE PRECISION) AS sum
 				FROM balance b
-						 LEFT JOIN users u ON u.id = b.user_id
-						 LEFT JOIN public."order" o on u.id = o.user_id
+						 INNER JOIN users u ON u.id = b.user_id
+						 LEFT JOIN public."order" o ON u.id = o.user_id
 						 LEFT JOIN withdraw w ON w.order_id = o.id
 				WHERE u.login = $1
-				GROUP BY b."user_id"`,
+				LIMIT 1`,
 		login)
 	err := row.Scan(&b.Current, &b.Withdrawn)
 	return b, err
@@ -166,7 +168,7 @@ func (s *Storage) GetWithdrawals(login string) ([]balance.Withdraw, error) {
 	}
 	defer rows.Close()
 
-	var sum int
+	var sum float32
 	var number, processedAt string
 	for rows.Next() {
 		err = rows.Scan(&number, &sum, &processedAt)

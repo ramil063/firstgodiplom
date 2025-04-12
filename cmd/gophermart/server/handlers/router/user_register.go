@@ -42,7 +42,7 @@ func userRegister(rw http.ResponseWriter, r *http.Request, s storage.Storager) {
 		return
 	}
 
-	err = s.AddUser(register, passwordHash)
+	err = s.AddUserData(register, passwordHash)
 
 	if errors.Is(err, internalErrors.ErrUniqueViolation) {
 		logger.WriteErrorLog(err.Error())
@@ -55,14 +55,8 @@ func userRegister(rw http.ResponseWriter, r *http.Request, s storage.Storager) {
 		return
 	}
 
-	u, err := s.GetUser(register.Login)
-	if err != nil {
-		logger.WriteErrorLog(err.Error())
-		rw.WriteHeader(http.StatusInternalServerError)
-		return
-	}
 	var t auth.Token
-	t, err = authHandlers.AuthenticateUser(s, u)
+	t, err = authHandlers.AuthenticateUser(s, register.Login)
 	if err != nil {
 		logger.WriteErrorLog(err.Error())
 		rw.WriteHeader(http.StatusInternalServerError)

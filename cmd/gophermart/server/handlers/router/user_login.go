@@ -44,7 +44,7 @@ func userLogin(rw http.ResponseWriter, r *http.Request, dbs storage.Storager) {
 	}
 
 	var t auth.Token
-	t, err = authHandlers.AuthenticateUser(dbs, u)
+	t, err = authHandlers.AuthenticateUser(dbs, login.Login)
 	if err != nil {
 		logger.WriteErrorLog(err.Error())
 		rw.WriteHeader(http.StatusInternalServerError)

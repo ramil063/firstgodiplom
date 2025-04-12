@@ -10,12 +10,12 @@ import (
 
 type Tokener interface {
 	GetAccessTokenData(token string) (user.AccessTokenData, error)
-	UpdateToken(u user.User, t auth.Token, expiredAt int64) error
+	UpdateToken(login string, t auth.Token, expiredAt int64) error
 }
 
 type Userer interface {
 	GetUser(login string) (user.User, error)
-	AddUser(r user.Register, hash string) error
+	AddUserData(r user.Register, hash string) error
 }
 
 type Orderer interface {

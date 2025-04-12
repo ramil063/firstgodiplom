@@ -2,6 +2,7 @@ package balance
 
 // Balance описывает структуру баланса
 type Balance struct {
-	Current   float64 `json:"current"`   // Текущее
-	Withdrawn int     `json:"withdrawn"` // Списания
+	ID        int     `json:"id,omitempty"` // Текущее
+	Current   float32 `json:"current"`      // Текущее
+	Withdrawn float32 `json:"withdrawn"`    // Списания
 }

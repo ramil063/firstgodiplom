@@ -14,21 +14,52 @@ import (
 	"github.com/ramil063/firstgodiplom/internal/storage/db/dml"
 )
 
-func (s *Storage) AddUser(register user.Register, passwordHash string) error {
+func (s *Storage) AddUserData(register user.Register, passwordHash string) error {
 
-	result, err := dml.AddUser(&dml.DBRepository, register.Login, passwordHash, register.Name)
+	tx, err := dml.DBRepository.Pool.BeginTx(context.Background(), pgx.TxOptions{})
 	if err != nil {
 		return err
 	}
+
+	result, err := dml.AddUser(tx, register.Login, passwordHash, register.Name)
+	if err != nil {
+		_ = tx.Rollback(context.Background())
+		return err
+	}
 	if result == nil {
-		logger.WriteErrorLog("error in sql empty result")
+		_ = tx.Rollback(context.Background())
+		logger.WriteErrorLog("AddUser error in sql empty result")
 		return errors.New("error in sql empty result")
 	}
 
 	rows := result.RowsAffected()
 	if rows != 1 {
-		logger.WriteErrorLog("error expected to affect 1 row")
+		_ = tx.Rollback(context.Background())
+		logger.WriteErrorLog("AddUser error expected to affect 1 row")
 		return errors.New("expected to affect 1 row")
+	}
+
+	result, err = dml.AddBalance(tx, register.Login)
+	if err != nil {
+		_ = tx.Rollback(context.Background())
+		return err
+	}
+	if result == nil {
+		_ = tx.Rollback(context.Background())
+		logger.WriteErrorLog("AddBalance error in sql empty result")
+		return errors.New("error in sql empty result")
+	}
+
+	rows = result.RowsAffected()
+	if rows != 1 {
+		_ = tx.Rollback(context.Background())
+		logger.WriteErrorLog("AddBalance error expected to affect 1 row")
+		return errors.New("expected to affect 1 row")
+	}
+
+	err = tx.Commit(context.Background())
+	if err != nil {
+		return err
 	}
 	return nil
 }
@@ -98,7 +129,7 @@ func (s *Storage) AddWithdraw(withdraw balance.Withdraw, login string) error {
 		return errors.New("expected to affect 1 row")
 	}
 
-	result, err = dml.MinusBalance(tx, withdraw.Sum, login)
+	result, err = dml.OperatingBalance(tx, withdraw.Sum, "+", login)
 	if err != nil {
 		errTx := tx.Rollback(context.Background())
 		if errTx != nil {

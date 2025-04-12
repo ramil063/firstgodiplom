@@ -75,7 +75,7 @@ func SyncAccrual(c Clienter, url string, ordersCh chan user.OrderCheckAccrual, s
 			if err == nil {
 				logMsg, _ := json.Marshal(order)
 				logger.WriteInfoLog(string(logMsg))
-				log.Println("accrual: 200, ", order.Order)
+				log.Println("accrual: 200, order: ", order)
 				err = s.UpdateOrderAccrual(order)
 			}
 

@@ -10,12 +10,11 @@ import (
 
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage"
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage/models/auth"
-	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage/models/user"
 	internalErrors "github.com/ramil063/firstgodiplom/internal/errors"
 	"github.com/ramil063/firstgodiplom/internal/hash"
 )
 
-func AuthenticateUser(s storage.Storager, u user.User) (auth.Token, error) {
+func AuthenticateUser(s storage.Storager, login string) (auth.Token, error) {
 	var err error
 	var t auth.Token
 
@@ -25,7 +24,7 @@ func AuthenticateUser(s storage.Storager, u user.User) (auth.Token, error) {
 	}
 
 	expiredAt := time.Now().Unix() + auth.TokenExpiredSeconds
-	err = s.UpdateToken(u, t, expiredAt)
+	err = s.UpdateToken(login, t, expiredAt)
 	return t, err
 }
 
