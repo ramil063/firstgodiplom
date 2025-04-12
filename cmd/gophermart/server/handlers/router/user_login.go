@@ -52,6 +52,7 @@ func userLogin(rw http.ResponseWriter, r *http.Request, dbs storage.Storager) {
 	}
 
 	rw.Header().Set("Content-Type", "application/json")
+	rw.Header().Set("Authorization", "Bearer "+t.Token)
 	rw.WriteHeader(http.StatusOK)
 	rw.Header().Set("Content-Type", "application/json")
 
