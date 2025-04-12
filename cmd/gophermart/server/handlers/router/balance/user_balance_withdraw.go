@@ -25,10 +25,10 @@ func AddWithdraw(rw http.ResponseWriter, r *http.Request, dbs storage.Storager) 
 	}
 
 	logMsg, _ := json.Marshal(withdraw)
-	logger.WriteInfoLog(string(logMsg))
+	logger.WriteInfoLog("AddWithdraw:" + string(logMsg))
 
 	if withdraw.Sum <= 0 {
-		logger.WriteErrorLog("sum must be positive")
+		logger.WriteErrorLog("AddWithdraw sum must be positive")
 		rw.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -41,7 +41,7 @@ func AddWithdraw(rw http.ResponseWriter, r *http.Request, dbs storage.Storager) 
 	}
 
 	if !luhn.Valid(num) {
-		logger.WriteErrorLog("wrong format luhn number")
+		logger.WriteErrorLog("AddWithdraw wrong format luhn number:" + withdraw.OrderNumber)
 		rw.WriteHeader(http.StatusUnprocessableEntity)
 		return
 	}
@@ -49,14 +49,14 @@ func AddWithdraw(rw http.ResponseWriter, r *http.Request, dbs storage.Storager) 
 	token := auth.GetTokenFromHeader(r)
 	tokenData, err := dbs.GetAccessTokenData(token)
 	if err != nil {
-		logger.WriteErrorLog(err.Error())
+		logger.WriteErrorLog("AddWithdraw GetAccessTokenData error:" + err.Error())
 		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	balance, err := dbs.GetBalance(tokenData.Login)
 	if err != nil {
-		logger.WriteErrorLog(err.Error())
+		logger.WriteErrorLog("AddWithdraw GetBalance error:" + err.Error())
 		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -69,11 +69,11 @@ func AddWithdraw(rw http.ResponseWriter, r *http.Request, dbs storage.Storager) 
 
 	err = dbs.AddWithdraw(withdraw, tokenData.Login)
 	if err != nil {
-		logger.WriteErrorLog(err.Error())
+		logger.WriteErrorLog("AddWithdraw AddWithdraw error:" + err.Error())
 		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	logger.WriteInfoLog("withdraw added successfully")
+	logger.WriteInfoLog(tokenData.Login + "withdraw added successfully")
 	rw.WriteHeader(http.StatusOK)
 }

@@ -20,7 +20,7 @@ func CheckAuthMiddleware(s storage.Storager) func(http.Handler) http.Handler {
 			err := auth.CheckAuthenticatedUser(s, token)
 
 			if errors.Is(err, internalErrors.ErrIncorrectToken) || errors.Is(err, internalErrors.ErrExpiredToken) {
-				logger.WriteErrorLog("token is incorrect")
+				logger.WriteErrorLog("token is incorrect:" + token)
 				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}

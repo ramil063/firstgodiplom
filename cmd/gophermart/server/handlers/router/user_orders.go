@@ -31,7 +31,7 @@ func putOrder(rw http.ResponseWriter, r *http.Request, dbs storage.Storager) {
 	}
 
 	if !luhn.Valid(num) {
-		logger.WriteErrorLog("wrong format luhn number")
+		logger.WriteErrorLog("putOrder wrong format luhn number:" + number)
 		rw.WriteHeader(http.StatusUnprocessableEntity)
 		return
 	}

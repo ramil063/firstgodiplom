@@ -124,7 +124,7 @@ func (s *Storage) AddWithdraw(withdraw balance.Withdraw, login string) error {
 		return errors.New("expected to affect 1 row")
 	}
 
-	result, err = dml.OperatingBalance(tx, withdraw.Sum, "+", login)
+	result, err = dml.OperatingBalance(tx, withdraw.Sum, "-", login)
 	if err != nil {
 		errTx := tx.Rollback(context.Background())
 		if errTx != nil {
