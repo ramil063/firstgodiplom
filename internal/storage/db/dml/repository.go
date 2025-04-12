@@ -235,8 +235,7 @@ func GetBalance(tx pgx.Tx, login string) (balance.Balance, error) {
 					   COALESCE(sum(w.sum) OVER (PARTITION BY b.id), 0::DOUBLE PRECISION) as sum
 				FROM balance b
 						 LEFT JOIN users u ON u.id = b.user_id
-						 LEFT JOIN public."order" o on u.id = o.user_id
-						 LEFT JOIN withdraw w ON w.order_id = o.id
+						 LEFT JOIN withdraw w ON w.user_id = b.user_id
 				WHERE u.login = $1
 				LIMIT 1`,
 		login)
