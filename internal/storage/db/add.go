@@ -11,17 +11,21 @@ import (
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage/models/user/balance"
 	orderStatus "github.com/ramil063/firstgodiplom/internal/constants/status"
 	"github.com/ramil063/firstgodiplom/internal/logger"
-	"github.com/ramil063/firstgodiplom/internal/storage/db/dml"
+	balanceRepository "github.com/ramil063/firstgodiplom/internal/storage/db/dml/balance"
+	orderRepository "github.com/ramil063/firstgodiplom/internal/storage/db/dml/order"
+	"github.com/ramil063/firstgodiplom/internal/storage/db/dml/repository"
+	userRepository "github.com/ramil063/firstgodiplom/internal/storage/db/dml/user"
+	withdrawRepository "github.com/ramil063/firstgodiplom/internal/storage/db/dml/withdraw"
 )
 
 func (s *Storage) AddUserData(register user.Register, passwordHash string) error {
 
-	tx, err := dml.DBRepository.Pool.BeginTx(context.Background(), pgx.TxOptions{})
+	tx, err := repository.DBRepository.Pool.BeginTx(context.Background(), pgx.TxOptions{})
 	if err != nil {
 		return err
 	}
 
-	result, err := dml.AddUser(tx, register.Login, passwordHash, register.Name)
+	result, err := userRepository.AddUser(tx, register.Login, passwordHash, register.Name)
 	if err != nil {
 		_ = tx.Rollback(context.Background())
 		return err
@@ -39,7 +43,7 @@ func (s *Storage) AddUserData(register user.Register, passwordHash string) error
 		return errors.New("expected to affect 1 row")
 	}
 
-	result, err = dml.AddBalance(tx, register.Login)
+	result, err = balanceRepository.AddBalance(tx, register.Login)
 	if err != nil {
 		_ = tx.Rollback(context.Background())
 		return err
@@ -74,7 +78,7 @@ func (s *Storage) AddOrder(number string, tokenData user.AccessTokenData) error 
 	now := time.Now()
 	rfc3339Time := now.Format(time.RFC3339)
 
-	result, err := dml.AddOrder(&dml.DBRepository, number, 0, orderStatus.NewID, rfc3339Time, u.ID)
+	result, err := orderRepository.AddOrder(&repository.DBRepository, number, 0, orderStatus.NewID, rfc3339Time, u.ID)
 	if err != nil {
 		return err
 	}
@@ -97,12 +101,12 @@ func (s *Storage) AddWithdraw(withdraw balance.Withdraw, login string) error {
 	now := time.Now()
 	rfc3339Time := now.Format(time.RFC3339)
 
-	tx, err := dml.DBRepository.Pool.BeginTx(context.Background(), pgx.TxOptions{})
+	tx, err := repository.DBRepository.Pool.BeginTx(context.Background(), pgx.TxOptions{})
 	if err != nil {
 		return err
 	}
 
-	result, err := dml.AddWithdraw(tx, withdraw.OrderNumber, withdraw.Sum, rfc3339Time, login)
+	result, err := withdrawRepository.AddWithdraw(tx, withdraw.OrderNumber, withdraw.Sum, rfc3339Time, login)
 	if err != nil {
 		errTx := tx.Rollback(context.Background())
 		if errTx != nil {
@@ -113,18 +117,18 @@ func (s *Storage) AddWithdraw(withdraw balance.Withdraw, login string) error {
 
 	if result == nil {
 		_ = tx.Rollback(context.Background())
-		logger.WriteErrorLog("error in sql empty result")
+		logger.WriteErrorLog("AddWithdraw error in sql empty result")
 		return errors.New("error in sql empty result")
 	}
 
 	rows := result.RowsAffected()
 	if rows != 1 {
 		_ = tx.Rollback(context.Background())
-		logger.WriteErrorLog("error expected to affect 1 row")
+		logger.WriteErrorLog("AddWithdraw RowsAffected error expected to affect 1 row")
 		return errors.New("expected to affect 1 row")
 	}
 
-	result, err = dml.OperatingBalance(tx, withdraw.Sum, "-", login)
+	result, err = balanceRepository.OperatingBalance(tx, withdraw.Sum, "-", login)
 	if err != nil {
 		errTx := tx.Rollback(context.Background())
 		if errTx != nil {
@@ -135,14 +139,14 @@ func (s *Storage) AddWithdraw(withdraw balance.Withdraw, login string) error {
 
 	if result == nil {
 		_ = tx.Rollback(context.Background())
-		logger.WriteErrorLog("error in sql empty result")
+		logger.WriteErrorLog("AddWithdraw OperatingBalance error in sql empty result")
 		return errors.New("error in sql empty result")
 	}
 
 	rows = result.RowsAffected()
 	if rows != 1 {
 		_ = tx.Rollback(context.Background())
-		logger.WriteErrorLog("error expected to affect 1 row")
+		logger.WriteErrorLog("AddWithdraw OperatingBalance error expected to affect 1 row")
 		return errors.New("expected to affect 1 row")
 	}
 	err = tx.Commit(context.Background())

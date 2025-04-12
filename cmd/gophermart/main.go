@@ -10,7 +10,7 @@ import (
 	"github.com/ramil063/firstgodiplom/internal/env"
 	"github.com/ramil063/firstgodiplom/internal/logger"
 	"github.com/ramil063/firstgodiplom/internal/storage/db"
-	"github.com/ramil063/firstgodiplom/internal/storage/db/dml"
+	"github.com/ramil063/firstgodiplom/internal/storage/db/dml/repository"
 )
 
 func main() {
@@ -25,14 +25,14 @@ func main() {
 	logger.WriteInfoLog("--------------START SERVER-------------")
 
 	if flags.DatabaseURI != "" {
-		rep, err := dml.NewRepository()
+		rep, err := repository.NewRepository()
 		if err != nil {
 			logger.WriteErrorLog(err.Error())
 			return
 		}
-		dml.DBRepository = *rep
-		err = db.Init(&dml.DBRepository)
-		defer dml.DBRepository.Pool.Close()
+		repository.DBRepository = *rep
+		err = db.Init(&repository.DBRepository)
+		defer repository.DBRepository.Pool.Close()
 		if err != nil {
 			logger.WriteErrorLog(err.Error())
 			return

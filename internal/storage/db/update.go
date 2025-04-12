@@ -13,12 +13,15 @@ import (
 	statusConstants "github.com/ramil063/firstgodiplom/internal/constants/status"
 	"github.com/ramil063/firstgodiplom/internal/env"
 	"github.com/ramil063/firstgodiplom/internal/logger"
-	"github.com/ramil063/firstgodiplom/internal/storage/db/dml"
+	balanceRepository "github.com/ramil063/firstgodiplom/internal/storage/db/dml/balance"
+	orderRepository "github.com/ramil063/firstgodiplom/internal/storage/db/dml/order"
+	"github.com/ramil063/firstgodiplom/internal/storage/db/dml/repository"
+	userRepository "github.com/ramil063/firstgodiplom/internal/storage/db/dml/user"
 )
 
 func (s *Storage) UpdateToken(login string, t auth.Token, expiredAt int64) error {
 
-	result, err := dml.UpdateToken(&dml.DBRepository, login, t.Token, expiredAt)
+	result, err := userRepository.UpdateToken(&repository.DBRepository, login, t.Token, expiredAt)
 
 	if err != nil {
 		return err
@@ -44,12 +47,12 @@ func (s *Storage) UpdateOrderAccrual(orderFromAccrual accrualStorage.Order) erro
 	}
 	internalOrderStatus := statusConstants.AccrualStatusesOrderStatusesMap[orderFromAccrual.Status]
 
-	tx, err := dml.DBRepository.Pool.BeginTx(context.Background(), pgx.TxOptions{})
+	tx, err := repository.DBRepository.Pool.BeginTx(context.Background(), pgx.TxOptions{})
 	if err != nil {
 		return err
 	}
 
-	resultUpdateOrderAccrual, err := dml.UpdateOrderAccrual(tx, order.Number, orderFromAccrual.Accrual, internalOrderStatus)
+	resultUpdateOrderAccrual, err := orderRepository.UpdateOrderAccrual(tx, order.Number, orderFromAccrual.Accrual, internalOrderStatus)
 	if err != nil {
 		_ = tx.Rollback(context.Background())
 		return err
@@ -66,14 +69,14 @@ func (s *Storage) UpdateOrderAccrual(orderFromAccrual accrualStorage.Order) erro
 		return errors.New("expected to affect 1 row")
 	}
 
-	orderEntity, err := dml.GetOrder(tx, order.Number)
+	orderEntity, err := orderRepository.GetOrder(tx, order.Number)
 	if err != nil {
 		_ = tx.Rollback(context.Background())
 		logger.WriteErrorLog("GetOrder error in sql")
 		return err
 	}
 
-	balance, err := dml.GetBalance(tx, orderEntity.UserLogin)
+	balance, err := balanceRepository.GetBalance(tx, orderEntity.UserLogin)
 	if err != nil {
 		_ = tx.Rollback(context.Background())
 		logger.WriteErrorLog("GetBalance error in sql")
@@ -85,7 +88,7 @@ func (s *Storage) UpdateOrderAccrual(orderFromAccrual accrualStorage.Order) erro
 		return errors.New("error in sql empty result")
 	}
 
-	resultOperatingBalance, err := dml.OperatingBalance(tx, orderFromAccrual.Accrual, "+", orderEntity.UserLogin)
+	resultOperatingBalance, err := balanceRepository.OperatingBalance(tx, orderFromAccrual.Accrual, "+", orderEntity.UserLogin)
 	if err != nil {
 		_ = tx.Rollback(context.Background())
 		return err
@@ -112,7 +115,7 @@ func (s *Storage) UpdateOrderCheckAccrualAfter(orderNumber string) error {
 	if env.AppEnv == "PROD" {
 		checkAfterUnix += orderConstants.CheckAccrualAfterSeconds
 	}
-	result, err := dml.UpdateOrderCheckAccrualAfter(&dml.DBRepository, orderNumber, checkAfterUnix)
+	result, err := orderRepository.UpdateOrderCheckAccrualAfter(&repository.DBRepository, orderNumber, checkAfterUnix)
 
 	if err != nil {
 		return err

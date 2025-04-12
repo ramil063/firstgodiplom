@@ -5,12 +5,12 @@ import (
 	"time"
 
 	"github.com/ramil063/firstgodiplom/internal/logger"
-	"github.com/ramil063/firstgodiplom/internal/storage/db/dml"
+	"github.com/ramil063/firstgodiplom/internal/storage/db/dml/repository"
 )
 
 type Storage struct{}
 
-func Init(dbr dml.DataBaser) error {
+func Init(dbr repository.DataBaser) error {
 	var err error
 
 	if err = CheckPing(dbr); err != nil {
@@ -22,14 +22,14 @@ func Init(dbr dml.DataBaser) error {
 	return err
 }
 
-func CheckPing(dbr dml.DataBaser) error {
+func CheckPing(dbr repository.DataBaser) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 
 	return dbr.PingContext(ctx)
 }
 
-func CreateTables(dbr dml.DataBaser) error {
+func CreateTables(dbr repository.DataBaser) error {
 	var err error
 
 	createTablesSQL := `
