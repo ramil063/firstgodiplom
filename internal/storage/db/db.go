@@ -4,14 +4,27 @@ import (
 	"context"
 	"time"
 
+	"github.com/jackc/pgconn"
+	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/pgxpool"
+
 	"github.com/ramil063/firstgodiplom/internal/logger"
-	"github.com/ramil063/firstgodiplom/internal/storage/db/dml/repository"
 )
 
 type Storage struct{}
 
+// DataBaser основные команды для работы с бд
+type DataBaser interface {
+	ExecContext(ctx context.Context, query string, args ...any) (pgconn.CommandTag, error)
+	QueryRowContext(ctx context.Context, query string, args ...any) pgx.Row
+	QueryContext(ctx context.Context, query string, args ...any) (pgx.Rows, error)
+	Open() (*pgxpool.Pool, error)
+	PingContext(ctx context.Context) error
+	SetPool() error
+}
+
 // Init инициализация таблиц бд и проверка соединения
-func Init(dbr repository.DataBaser) error {
+func Init(dbr DataBaser) error {
 	var err error
 
 	if err = CheckPing(dbr); err != nil {
@@ -24,7 +37,7 @@ func Init(dbr repository.DataBaser) error {
 }
 
 // CheckPing проверка соединения с бд
-func CheckPing(dbr repository.DataBaser) error {
+func CheckPing(dbr DataBaser) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 
@@ -32,11 +45,10 @@ func CheckPing(dbr repository.DataBaser) error {
 }
 
 // CreateTables создание основных таблиц
-func CreateTables(dbr repository.DataBaser) error {
+func CreateTables(dbr DataBaser) error {
 	var err error
 
-	createTablesSQL := `
-			--USERS
+	createTablesSQL := `--USERS
 	CREATE TABLE IF NOT EXISTS public.users
 	(
 		id   		serial not null constraint pk_users_id primary key,

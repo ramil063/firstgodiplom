@@ -56,10 +56,7 @@ func UpdateOrderAccrual(tx pgx.Tx, number string, accrual float32, statusID int)
 func UpdateOrderCheckAccrualAfter(dbr *repository.Repository, number string, checkAccrualAfter int64) (pgconn.CommandTag, error) {
 	exec, err := dbr.ExecContext(
 		context.Background(),
-		`
-			UPDATE "order" 
-			SET "check_accrual_after" = $1
-			WHERE number = $2`,
+		`UPDATE "order" SET "check_accrual_after" = $1 WHERE number = $2`,
 		checkAccrualAfter,
 		number)
 

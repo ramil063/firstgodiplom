@@ -35,7 +35,7 @@ func AddUser(tx pgx.Tx, login string, password string, name string) (pgconn.Comm
 func UpdateToken(dbr *repository.Repository, login string, token string, expiredAt int64) (pgconn.CommandTag, error) {
 	exec, err := dbr.ExecContext(
 		context.Background(),
-		" UPDATE users SET access_token = $1, access_token_expired_at = $2 WHERE login = $3",
+		"UPDATE users SET access_token = $1, access_token_expired_at = $2 WHERE login = $3",
 		token,
 		expiredAt,
 		login)

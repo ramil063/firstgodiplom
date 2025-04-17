@@ -10,17 +10,17 @@ import (
 )
 
 // GetBalance получение баланса пользователя
-func GetBalance(rw http.ResponseWriter, r *http.Request, dbs storage.Storager) {
+func GetBalance(rw http.ResponseWriter, r *http.Request, s storage.Storager) {
 
 	token := auth.GetTokenFromHeader(r)
-	tokenData, err := dbs.GetAccessTokenData(token)
+	tokenData, err := s.GetAccessTokenData(token)
 	if err != nil {
 		logger.WriteErrorLog(err.Error())
 		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	balance, err := dbs.GetBalance(tokenData.Login)
+	balance, err := s.GetBalance(tokenData.Login)
 	if err != nil {
 		logger.WriteErrorLog(err.Error())
 		rw.WriteHeader(http.StatusInternalServerError)

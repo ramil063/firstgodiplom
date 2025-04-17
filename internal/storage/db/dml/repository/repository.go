@@ -12,18 +12,17 @@ import (
 	"github.com/ramil063/firstgodiplom/internal/logger"
 )
 
-type Repository struct {
-	Pool *pgxpool.Pool
+type Pooler interface {
+	Close()
+	BeginTx(ctx context.Context, txOptions pgx.TxOptions) (pgx.Tx, error)
+	Ping(ctx context.Context) error
+	Query(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error)
+	QueryRow(ctx context.Context, sql string, args ...interface{}) pgx.Row
+	Exec(ctx context.Context, sql string, arguments ...interface{}) (pgconn.CommandTag, error)
 }
 
-// DataBaser основные команды для работы с бд
-type DataBaser interface {
-	ExecContext(ctx context.Context, query string, args ...any) (pgconn.CommandTag, error)
-	QueryRowContext(ctx context.Context, query string, args ...any) pgx.Row
-	QueryContext(ctx context.Context, query string, args ...any) (pgx.Rows, error)
-	Open() (*pgxpool.Pool, error)
-	PingContext(ctx context.Context) error
-	SetPool() error
+type Repository struct {
+	Pool Pooler
 }
 
 var DBRepository Repository

@@ -7,7 +7,7 @@ import (
 )
 
 type Clienter interface {
-	NewRequest(method string, url string) (*http.Request, error)
+	NewRequest(method string, url string, body []byte) (*http.Request, error)
 	SendRequest(method string, url string, body []byte) (int, io.ReadCloser, http.Header, error)
 }
 
@@ -25,7 +25,7 @@ func NewClient() Clienter {
 // SendRequest отправка запроса
 func (c client) SendRequest(method string, url string, body []byte) (int, io.ReadCloser, http.Header, error) {
 
-	req, err := http.NewRequest(method, url, bytes.NewReader(body))
+	req, err := c.NewRequest(method, url, body)
 	if err != nil {
 		return http.StatusInternalServerError, nil, nil, err
 	}
@@ -39,6 +39,6 @@ func (c client) SendRequest(method string, url string, body []byte) (int, io.Rea
 }
 
 // NewRequest создание нового запроса
-func (c client) NewRequest(method string, url string) (*http.Request, error) {
-	return http.NewRequest(method, url, nil)
+func (c client) NewRequest(method string, url string, body []byte) (*http.Request, error) {
+	return http.NewRequest(method, url, bytes.NewReader(body))
 }

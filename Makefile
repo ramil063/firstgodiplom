@@ -18,4 +18,7 @@ run-accrual-win:
 run:
 	./gophermart -d $(DATABASE_URI) -r http://localhost:8081
 
+test:
+	go test -v ./...
+
 .PHONY: build clean run
