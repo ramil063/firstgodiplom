@@ -71,10 +71,8 @@ func TestOrdersProcess(t *testing.T) {
 				go func() {
 					go OrdersProcess(clientMock, storageMock)
 				}()
-				select {
-				case <-time.After(1100 * time.Millisecond):
-					log.Println("close without error")
-				}
+				time.Sleep(1100 * time.Millisecond)
+				log.Println("close without error")
 			}()
 		})
 	}
@@ -131,10 +129,8 @@ func TestProcessAccrual(t *testing.T) {
 					Return(200, mockBody, mockHeader, nil)
 
 				go ProcessAccrual(clientMock, storageMock, tt.ticker)
-				select {
-				case <-time.After(1100 * time.Millisecond):
-					log.Println("close without error")
-				}
+				time.Sleep(1100 * time.Millisecond)
+				log.Println("close without error")
 			}()
 
 		})

@@ -72,7 +72,7 @@ func Test_client_NewRequest(t *testing.T) {
 }
 
 func Test_client_SendRequest(t *testing.T) {
-	mockHttpClient := &MockHTTPClient{
+	mockHTTPClient := &MockHTTPClient{
 		DoFunc: func(req *http.Request) (*http.Response, error) {
 			return &http.Response{
 				StatusCode: http.StatusOK,
@@ -107,7 +107,7 @@ func Test_client_SendRequest(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := ClientMock{
-				httpClient: *mockHttpClient,
+				httpClient: *mockHTTPClient,
 			}
 			got, got1, got2, err := c.SendRequest(tt.args.method, tt.args.url, tt.args.body)
 			if (err != nil) != tt.wantErr {

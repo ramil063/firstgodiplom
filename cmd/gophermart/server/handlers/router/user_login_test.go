@@ -37,6 +37,7 @@ func Test_userLogin(t *testing.T) {
 
 		storageMock := storage2.NewMockStorager(ctrl)
 		passwordHash, err := hash.GetPasswordHash(tt.password)
+		assert.NoError(t, err)
 
 		userMock := user.User{
 			Login:        tt.login,

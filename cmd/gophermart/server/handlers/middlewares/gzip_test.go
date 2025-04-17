@@ -17,7 +17,6 @@ func TestGZIPMiddleware(t *testing.T) {
 		rw.Header().Set("Content-Type", "application/json")
 		rw.Header().Set("Accept-Encoding", "gzip")
 		rw.WriteHeader(http.StatusOK)
-		return
 	})
 	srv := httptest.NewServer(GZIPMiddleware(handler))
 	defer srv.Close()
@@ -41,7 +40,6 @@ func TestGZIPMiddleware(t *testing.T) {
 		require.Equal(t, http.StatusOK, resp.StatusCode)
 
 		defer resp.Body.Close()
-
 	})
 
 	t.Run("accepts_gzip", func(t *testing.T) {
