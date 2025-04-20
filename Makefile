@@ -21,4 +21,14 @@ run:
 test:
 	go test -v ./...
 
+test-cover:
+	go test -coverprofile=coverage.out ./...
+	go tool cover -func=coverage.out
+	@rm -f coverage.out
+
+test-cover-html:
+	go test -coverprofile=coverage.out ./...
+	go tool cover -html=coverage.out -o coverage.html
+	@open coverage.html || xdg-open coverage.html
+
 .PHONY: build clean run
