@@ -97,7 +97,7 @@ func TestGetOrder(t *testing.T) {
 					expectedOrder.UploadedAt,
 					expectedOrder.UserLogin)
 
-			mock.ExpectQuery(`^SELECT o.id, number, accrual::DOUBLE PRECISION, s.alias, uploaded_at, u.login*
+			mock.ExpectQuery(`^SELECT o.id, number, accrual::DECIMAL, s.alias, uploaded_at, u.login*
 				FROM "order" o*
 				LEFT JOIN users u ON u.id = o.user_id*
 				LEFT JOIN status s ON s.id = o.status_id*

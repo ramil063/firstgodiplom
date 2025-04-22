@@ -70,7 +70,7 @@ func CreateTables(dbr DataBaser) error {
 	(
 		id         	serial not null constraint pk_order_id primary key,
 		number     	varchar(64) not null constraint uidx_order_number unique,
-		accrual     double precision default 0 not null,
+		accrual     decimal default 0 not null,
 		status_id  	integer not null,
 		created_at 	timestamp default current_timestamp not null,
     	uploaded_at varchar(64)                         not null,
@@ -105,7 +105,7 @@ func CreateTables(dbr DataBaser) error {
 	(
 		id           serial not null constraint pk_withdraw_id primary key,
 		"order"    	 varchar(64) not null,
-		sum          double precision default 0 not null,
+		sum          decimal default 0 not null,
 		user_id      integer not null constraint fk_withdraw_user_id references public.users,
 		processed_at varchar(100) not null,
 		created_at   timestamp default current_timestamp not null
@@ -122,7 +122,7 @@ func CreateTables(dbr DataBaser) error {
 	(
 		id      serial not null constraint balance_pk primary key,
 		user_id integer not null constraint fk_balance_user_id references public.users,
-		value   double precision default 0 not null
+		value   decimal default 0 not null
 	);
 	COMMENT ON COLUMN public.balance.id IS 'Идентификатор';
 	COMMENT ON COLUMN public.balance.user_id IS 'Пользователь';

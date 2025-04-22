@@ -91,7 +91,7 @@ func TestRepository_QueryContext(t *testing.T) {
 		{
 			name:   "test 1",
 			number: "1",
-			query: `^SELECT o.id, number, accrual::DOUBLE PRECISION, s.alias, uploaded_at, u.login*
+			query: `^SELECT o.id, number, accrual::DECIMAL, s.alias, uploaded_at, u.login*
 				FROM "order" o*
 				LEFT JOIN users u ON u.id = o.user_id*
 				LEFT JOIN status s ON s.id = o.status_id*

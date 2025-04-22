@@ -119,7 +119,7 @@ func TestStorage_GetAllOrdersInStatuses(t *testing.T) {
 			rows := mock.NewRows([]string{"number", "accrual", "status"}).
 				AddRow(tt.want[0].Number, tt.want[0].Accrual, tt.want[0].Status)
 
-			mock.ExpectQuery(`.*SELECT number\, accrual\:\:DOUBLE PRECISION\, s.alias.*`).
+			mock.ExpectQuery(`.*SELECT number\, accrual\:\:DECIMAL\, s.alias.*`).
 				WithArgs(
 					pq.Array(tt.statuses),
 					time.Now().Unix()).
@@ -247,8 +247,8 @@ func TestStorage_GetOrders(t *testing.T) {
 			login: "ramil",
 			want: []user.Order{{
 				Number:     "1",
-				Status:     "NEW",
 				Accrual:    100.1,
+				Status:     "NEW",
 				UploadedAt: "2025-04-17",
 			}},
 		},
@@ -262,10 +262,10 @@ func TestStorage_GetOrders(t *testing.T) {
 			defer mock.Close()
 			repository.DBRepository = repository.Repository{Pool: mock}
 
-			rows := mock.NewRows([]string{"number", "status", "accrual", "status"}).
-				AddRow(tt.want[0].Number, tt.want[0].Status, tt.want[0].Accrual, tt.want[0].Status)
+			rows := mock.NewRows([]string{"number", "accrual", "status", "status"}).
+				AddRow(tt.want[0].Number, tt.want[0].Accrual, tt.want[0].Status, tt.want[0].UploadedAt)
 
-			mock.ExpectQuery(`.*SELECT number\, accrual\:\:DOUBLE PRECISION\, s.alias.*`).
+			mock.ExpectQuery(`.*SELECT number\, accrual\:\:DECIMAL\, s.alias.*`).
 				WithArgs(tt.login).
 				WillReturnRows(rows)
 
@@ -354,8 +354,8 @@ func TestStorage_GetWithdrawals(t *testing.T) {
 			defer mock.Close()
 			repository.DBRepository = repository.Repository{Pool: mock}
 
-			rows := mock.NewRows([]string{"sum", "number", "processed_at"}).
-				AddRow(tt.want[0].Sum, tt.want[0].OrderNumber, tt.want[0].ProcessedAt)
+			rows := mock.NewRows([]string{"number", "sum", "processed_at"}).
+				AddRow(tt.want[0].OrderNumber, tt.want[0].Sum, tt.want[0].ProcessedAt)
 
 			mock.ExpectQuery(`SELECT "order"\, "sum"\, processed_at.*`).
 				WithArgs(tt.login).

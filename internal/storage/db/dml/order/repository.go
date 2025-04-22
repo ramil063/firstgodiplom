@@ -71,7 +71,7 @@ func GetOrder(tx pgx.Tx, number string) (user.Order, error) {
 	var o user.Order
 	row := tx.QueryRow(
 		context.Background(),
-		`SELECT o.id, number, accrual::DOUBLE PRECISION, s.alias, uploaded_at, u.login
+		`SELECT o.id, number, accrual::DECIMAL, s.alias, uploaded_at, u.login
 				FROM "order" o
 				LEFT JOIN users u ON u.id = o.user_id
 				LEFT JOIN status s ON s.id = o.status_id

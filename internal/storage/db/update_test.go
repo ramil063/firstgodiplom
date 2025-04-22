@@ -79,7 +79,7 @@ func TestStorage_UpdateOrderAccrual(t *testing.T) {
 					tt.expectedOrder.Status,
 					tt.expectedOrder.UploadedAt,
 					tt.expectedOrder.UserLogin)
-			mock.ExpectQuery(`.*SELECT o.id, number, accrual::DOUBLE PRECISION`).
+			mock.ExpectQuery(`.*SELECT o.id, number, accrual::DECIMAL`).
 				WithArgs(tt.orderFromAccrual.Order).
 				WillReturnRows(rows)
 

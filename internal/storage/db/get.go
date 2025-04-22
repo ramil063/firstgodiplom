@@ -40,7 +40,7 @@ func (s *Storage) GetOrder(number string) (user.Order, error) {
 	var o user.Order
 	row := repository.DBRepository.QueryRowContext(
 		context.Background(),
-		`SELECT o.id, number, accrual::DOUBLE PRECISION, s.alias, uploaded_at, u.login
+		`SELECT o.id, number, accrual::DECIMAL, s.alias, uploaded_at, u.login
 				FROM "order" o
 				LEFT JOIN users u ON u.id = o.user_id
 				LEFT JOIN status s ON s.id = o.status_id
@@ -55,7 +55,7 @@ func (s *Storage) GetOrders(login string) ([]user.Order, error) {
 	var res []user.Order
 	rows, err := repository.DBRepository.QueryContext(
 		context.Background(),
-		`SELECT number, accrual::DOUBLE PRECISION, s.alias, uploaded_at
+		`SELECT number, accrual::DECIMAL, s.alias, uploaded_at
 				FROM "order" o
 				LEFT JOIN users u ON u.id = o.user_id
 				LEFT JOIN status s ON s.id = o.status_id
@@ -72,7 +72,7 @@ func (s *Storage) GetOrders(login string) ([]user.Order, error) {
 		err = rows.Scan(&number, &accrual, &status, &uploadedAt)
 		if err != nil {
 			logger.WriteErrorLog(err.Error())
-			continue
+			return nil, err
 		}
 		res = append(res, user.Order{
 			Number:     number,
@@ -95,7 +95,7 @@ func (s *Storage) GetAllOrdersInStatuses(statuses []int) ([]user.OrderCheckAccru
 
 	rows, err := repository.DBRepository.QueryContext(
 		context.Background(),
-		`SELECT number, accrual::DOUBLE PRECISION, s.alias
+		`SELECT number, accrual::DECIMAL, s.alias
 				FROM "order" o
 				LEFT JOIN status s ON s.id = o.status_id
 				WHERE status_id = ANY($1)
@@ -115,7 +115,7 @@ func (s *Storage) GetAllOrdersInStatuses(statuses []int) ([]user.OrderCheckAccru
 		err = rows.Scan(&number, &accrual, &status)
 		if err != nil {
 			logger.WriteErrorLog(err.Error())
-			continue
+			return nil, err
 		}
 		res = append(res, user.OrderCheckAccrual{
 			Number:  number,
@@ -137,8 +137,8 @@ func (s *Storage) GetBalance(login string) (balance.Balance, error) {
 	row := repository.DBRepository.QueryRowContext(
 		context.Background(),
 		`SELECT
-					"value"::DOUBLE PRECISION AS balance,
-					COALESCE(SUM(w.sum) OVER(PARTITION BY b.id), 0::DOUBLE PRECISION) AS sum
+					"value"::DECIMAL AS balance,
+					COALESCE(SUM(w.sum) OVER(PARTITION BY b.id), 0::DECIMAL) AS sum
 				FROM balance b
 						 INNER JOIN users u ON u.id = b.user_id
 						 LEFT JOIN withdraw w ON w.user_id = b.user_id
@@ -171,7 +171,7 @@ func (s *Storage) GetWithdrawals(login string) ([]balance.Withdraw, error) {
 		err = rows.Scan(&number, &sum, &processedAt)
 		if err != nil {
 			logger.WriteErrorLog(err.Error())
-			continue
+			return nil, err
 		}
 		res = append(res, balance.Withdraw{
 			OrderNumber: number,

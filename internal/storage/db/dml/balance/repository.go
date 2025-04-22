@@ -36,8 +36,8 @@ func GetBalance(tx pgx.Tx, login string) (balance.Balance, error) {
 	row := tx.QueryRow(
 		context.Background(),
 		`SELECT b.id,
-					   "value"::DOUBLE PRECISION as balance,
-					   COALESCE(sum(w.sum) OVER (PARTITION BY b.id), 0::DOUBLE PRECISION) as sum
+					   "value"::DECIMAL as balance,
+					   COALESCE(sum(w.sum) OVER (PARTITION BY b.id), 0::DECIMAL) as sum
 				FROM balance b
 						 LEFT JOIN users u ON u.id = b.user_id
 						 LEFT JOIN withdraw w ON w.user_id = b.user_id
