@@ -4,17 +4,18 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/handlers/auth"
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage"
+	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage/models/user"
+	internalContextKeys "github.com/ramil063/firstgodiplom/internal/constants/context"
 	"github.com/ramil063/firstgodiplom/internal/logger"
 )
 
 // getWithdrawals получение списаний баллов с баланса
 func getWithdrawals(rw http.ResponseWriter, r *http.Request, dbs storage.Storager) {
-	token := auth.GetTokenFromHeader(r)
-	tokenData, err := dbs.GetAccessTokenData(token)
-	if err != nil {
-		logger.WriteErrorLog(err.Error())
+
+	tokenData, ok := r.Context().Value(internalContextKeys.AccessTokenData).(user.AccessTokenData)
+	if !ok {
+		logger.WriteErrorLog("putOrder AccessTokenData not found in context")
 		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}

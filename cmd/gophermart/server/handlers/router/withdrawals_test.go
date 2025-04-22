@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/handlers/middlewares"
 	storage2 "github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage/mocks"
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage/models/user"
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage/models/user/balance"
@@ -55,7 +56,7 @@ func Test_getWithdrawals(t *testing.T) {
 			getWithdrawHandlerFunction := func(rw http.ResponseWriter, r *http.Request) {
 				getWithdrawals(rw, r, storageMock)
 			}
-			handlerToTest := http.HandlerFunc(getWithdrawHandlerFunction)
+			handlerToTest := middlewares.CheckAuthMiddleware(storageMock)(http.HandlerFunc(getWithdrawHandlerFunction))
 			handlerToTest.ServeHTTP(w, request)
 
 			res := w.Result()

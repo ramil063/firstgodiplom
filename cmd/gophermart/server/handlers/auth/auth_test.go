@@ -57,7 +57,7 @@ func TestCheckAuthenticatedUser(t *testing.T) {
 			storageMock := storage2.NewMockStorager(ctrl)
 			storageMock.EXPECT().GetAccessTokenData(tt.token).Return(td, nil)
 
-			err := CheckAuthenticatedUser(storageMock, tt.token)
+			_, err := CheckAuthenticatedUser(storageMock, tt.token)
 			assert.NoError(t, err)
 		})
 	}

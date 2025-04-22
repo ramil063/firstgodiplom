@@ -10,6 +10,7 @@ import (
 
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage"
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage/models/auth"
+	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage/models/user"
 	internalErrors "github.com/ramil063/firstgodiplom/internal/errors"
 	"github.com/ramil063/firstgodiplom/internal/hash"
 )
@@ -30,18 +31,19 @@ func AuthenticateUser(s storage.Storager, login string) (auth.Token, error) {
 }
 
 // CheckAuthenticatedUser проверка пользователя на аутентификацию
-func CheckAuthenticatedUser(s storage.Storager, token string) error {
+func CheckAuthenticatedUser(s storage.Storager, token string) (user.AccessTokenData, error) {
 	var err error
-	tokenData, err := s.GetAccessTokenData(token)
+	var tokenData user.AccessTokenData
+	tokenData, err = s.GetAccessTokenData(token)
 
 	if errors.Is(err, pgx.ErrNoRows) {
-		return internalErrors.ErrIncorrectToken
+		return tokenData, internalErrors.ErrIncorrectToken
 	}
 
 	if tokenData.AccessTokenExpiredAt < time.Now().Unix() {
-		return internalErrors.ErrExpiredToken
+		return tokenData, internalErrors.ErrExpiredToken
 	}
-	return err
+	return tokenData, err
 }
 
 // GetTokenFromHeader получить токен из хедера

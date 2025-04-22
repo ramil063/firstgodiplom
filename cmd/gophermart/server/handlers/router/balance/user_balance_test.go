@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/handlers/middlewares"
 	storage2 "github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage/mocks"
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage/models/user"
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage/models/user/balance"
@@ -51,7 +52,7 @@ func TestGetBalance(t *testing.T) {
 			getBalanceHandlerFunction := func(rw http.ResponseWriter, r *http.Request) {
 				GetBalance(rw, r, storageMock)
 			}
-			handlerToTest := http.HandlerFunc(getBalanceHandlerFunction)
+			handlerToTest := middlewares.CheckAuthMiddleware(storageMock)(http.HandlerFunc(getBalanceHandlerFunction))
 			handlerToTest.ServeHTTP(w, request)
 
 			res := w.Result()

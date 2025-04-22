@@ -4,6 +4,9 @@ import (
 	"bytes"
 	"io"
 	"net/http"
+
+	internalErrorCodes "github.com/ramil063/firstgodiplom/internal/constants/error"
+	"github.com/ramil063/firstgodiplom/internal/errors"
 )
 
 type Clienter interface {
@@ -27,12 +30,18 @@ func (c client) SendRequest(method string, url string, body []byte) (int, io.Rea
 
 	req, err := c.NewRequest(method, url, body)
 	if err != nil {
-		return http.StatusInternalServerError, nil, nil, err
+		return internalErrorCodes.CommonServerErrorCode,
+			nil,
+			nil,
+			errors.NewRequestError(err.Error(), internalErrorCodes.CommonServerErrorCode)
 	}
 
 	res, err := c.httpClient.Do(req)
 	if err != nil {
-		return http.StatusInternalServerError, nil, nil, err
+		return internalErrorCodes.CommonServerErrorCode,
+			nil,
+			nil,
+			errors.NewRequestError(err.Error(), internalErrorCodes.CommonServerErrorCode)
 	}
 
 	return res.StatusCode, res.Body, res.Header, nil

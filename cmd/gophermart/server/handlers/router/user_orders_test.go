@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/handlers/middlewares"
 	storage2 "github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage/mocks"
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage/models/user"
 )
@@ -55,7 +56,7 @@ func Test_getOrders(t *testing.T) {
 			getOrderHandlerFunction := func(rw http.ResponseWriter, r *http.Request) {
 				getOrders(rw, r, storageMock)
 			}
-			handlerToTest := http.HandlerFunc(getOrderHandlerFunction)
+			handlerToTest := middlewares.CheckAuthMiddleware(storageMock)(http.HandlerFunc(getOrderHandlerFunction))
 			handlerToTest.ServeHTTP(w, request)
 
 			res := w.Result()
@@ -117,7 +118,7 @@ func Test_putOrder(t *testing.T) {
 			putOrderHandlerFunction := func(rw http.ResponseWriter, r *http.Request) {
 				putOrder(rw, r, storageMock)
 			}
-			handlerToTest := http.HandlerFunc(putOrderHandlerFunction)
+			handlerToTest := middlewares.CheckAuthMiddleware(storageMock)(http.HandlerFunc(putOrderHandlerFunction))
 			handlerToTest.ServeHTTP(w, request)
 
 			res := w.Result()
