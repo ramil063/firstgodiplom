@@ -10,8 +10,8 @@ import (
 )
 
 // OperatingBalance обновление баланса
-func OperatingBalance(tx pgx.Tx, sum float32, operator string, login string) (pgconn.CommandTag, error) {
-	exec, err := tx.Exec(
+func OperatingBalance(tx pgx.Tx, sum float32, operator string, login string) (float32, error) {
+	row := tx.QueryRow(
 		context.Background(),
 		`
 			UPDATE balance 
@@ -20,14 +20,14 @@ func OperatingBalance(tx pgx.Tx, sum float32, operator string, login string) (pg
 				SELECT id 
 				FROM users 
 				WHERE login = $2 LIMIT 1
-			);`,
+			)
+			RETURNING "value";`,
 		sum,
 		login)
 
-	if err != nil {
-		return nil, err
-	}
-	return exec, nil
+	var newBalance float32
+	err := row.Scan(&newBalance)
+	return newBalance, err
 }
 
 // GetBalance получение баланса

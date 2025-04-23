@@ -65,18 +65,18 @@ func (mr *MockStoragerMockRecorder) AddUserData(arg0, arg1 interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddUserData", reflect.TypeOf((*MockStorager)(nil).AddUserData), arg0, arg1)
 }
 
-// AddWithdraw mocks base method.
-func (m *MockStorager) AddWithdraw(arg0 balance.Withdraw, arg1 string) error {
+// AddWithdrawFromBalance mocks base method.
+func (m *MockStorager) AddWithdrawFromBalance(arg0 balance.Withdraw, arg1 string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddWithdraw", arg0, arg1)
+	ret := m.ctrl.Call(m, "AddWithdrawFromBalance", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// AddWithdraw indicates an expected call of AddWithdraw.
-func (mr *MockStoragerMockRecorder) AddWithdraw(arg0, arg1 interface{}) *gomock.Call {
+// AddWithdrawFromBalance indicates an expected call of AddWithdrawFromBalance.
+func (mr *MockStoragerMockRecorder) AddWithdrawFromBalance(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddWithdraw", reflect.TypeOf((*MockStorager)(nil).AddWithdraw), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddWithdrawFromBalance", reflect.TypeOf((*MockStorager)(nil).AddWithdrawFromBalance), arg0, arg1)
 }
 
 // GetAccessTokenData mocks base method.

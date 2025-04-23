@@ -123,10 +123,12 @@ func TestOperatingBalance(t *testing.T) {
 			defer mock.Close()
 
 			mock.ExpectBegin()
-			expectedCommandTag := pgconn.CommandTag("UPDATE 0 1")
-			mock.ExpectExec(`UPDATE balance.*SET "value" = "value" \+ \$1.*WHERE user_id = \(.*SELECT id.*FROM users.*WHERE login = \$2.*\);`).
+
+			rows := mock.NewRows([]string{"value"}).
+				AddRow(tt.sum)
+			mock.ExpectQuery(`UPDATE balance.*SET "value" = "value" \+ \$1.*WHERE user_id = \(.*SELECT id.*FROM users.*WHERE login = \$2.*\)*RETURNING "value";`).
 				WithArgs(tt.sum, tt.login).
-				WillReturnResult(expectedCommandTag)
+				WillReturnRows(rows)
 			mock.ExpectCommit()
 
 			tx, err := mock.Begin(context.Background())

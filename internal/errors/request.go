@@ -9,6 +9,7 @@ import (
 
 var ErrIncorrectToken = errors.New("incorrect access token")
 var ErrExpiredToken = errors.New("expired access token")
+var ErrNotEnoughBalance = errors.New("not enough balance")
 
 type RequestError struct {
 	Time       time.Time

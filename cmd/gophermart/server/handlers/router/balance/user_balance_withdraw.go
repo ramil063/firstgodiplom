@@ -2,6 +2,7 @@ package balance
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage/models/user"
 	balanceData "github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage/models/user/balance"
 	internalContextKeys "github.com/ramil063/firstgodiplom/internal/constants/context"
+	internalErrors "github.com/ramil063/firstgodiplom/internal/errors"
 	"github.com/ramil063/firstgodiplom/internal/logger"
 )
 
@@ -55,20 +57,12 @@ func AddWithdraw(rw http.ResponseWriter, r *http.Request, dbs storage.Storager) 
 		return
 	}
 
-	balance, err := dbs.GetBalance(tokenData.Login)
-	if err != nil {
-		logger.WriteErrorLog("AddWithdraw GetBalance error:" + err.Error())
-		rw.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	if balance.Current < withdraw.Sum {
+	err = dbs.AddWithdrawFromBalance(withdraw, tokenData.Login)
+	if errors.Is(err, internalErrors.ErrNotEnoughBalance) {
 		logger.WriteErrorLog("not enough balance")
 		rw.WriteHeader(http.StatusPaymentRequired)
 		return
 	}
-
-	err = dbs.AddWithdraw(withdraw, tokenData.Login)
 	if err != nil {
 		logger.WriteErrorLog("AddWithdraw AddWithdraw error:" + err.Error())
 		rw.WriteHeader(http.StatusInternalServerError)

@@ -126,12 +126,13 @@ func TestStorage_AddUserData(t *testing.T) {
 	}
 }
 
-func TestStorage_AddWithdraw(t *testing.T) {
+func TestStorage_AddWithdrawFromBalance(t *testing.T) {
 
 	tests := []struct {
-		name     string
-		login    string
-		withdraw balance.Withdraw
+		name            string
+		login           string
+		withdraw        balance.Withdraw
+		expectedBalance balance.Balance
 	}{
 		{
 			name:  "test 1",
@@ -141,6 +142,11 @@ func TestStorage_AddWithdraw(t *testing.T) {
 				Sum:         1,
 				ProcessedAt: "2025-04-17",
 				UserLogin:   "ramil",
+			},
+			expectedBalance: balance.Balance{
+				ID:        1,
+				Current:   100.50,
+				Withdrawn: 30.25,
 			},
 		},
 	}
@@ -154,6 +160,13 @@ func TestStorage_AddWithdraw(t *testing.T) {
 			repository.DBRepository = repository.Repository{Pool: mock}
 
 			mock.ExpectBegin()
+			rows := mock.NewRows([]string{"id", "balance", "sum"}).
+				AddRow(tt.expectedBalance.ID, tt.expectedBalance.Current, tt.expectedBalance.Withdrawn)
+
+			mock.ExpectQuery(`SELECT b.id, "value"::DECIMAL as balance, COALESCE.*WHERE u.login = \$1`).
+				WithArgs(tt.login).
+				WillReturnRows(rows)
+
 			expectedCommandTag := pgconn.CommandTag("INSERT 0 1")
 			mock.ExpectExec(`^INSERT INTO withdraw \(sum, "order", processed_at, user_id\) VALUES \(\$1, \$2, \$3, \(SELECT id FROM users WHERE login = \$4\)\)`).
 				WithArgs(
@@ -164,14 +177,15 @@ func TestStorage_AddWithdraw(t *testing.T) {
 				).
 				WillReturnResult(expectedCommandTag)
 
-			expectedCommandTag = pgconn.CommandTag("UPDATE 0 1")
-			mock.ExpectExec(`UPDATE balance.*SET "value" = "value" \- \$1.*WHERE user_id = \(.*SELECT id.*FROM users.*WHERE login = \$2.*\);`).
+			rows = mock.NewRows([]string{"value"}).
+				AddRow(tt.withdraw.Sum)
+			mock.ExpectQuery(`UPDATE balance.*SET "value" = "value" \- \$1.*WHERE user_id = \(.*SELECT id.*FROM users.*WHERE login = \$2.*\)*RETURNING "value";`).
 				WithArgs(tt.withdraw.Sum, tt.login).
-				WillReturnResult(expectedCommandTag)
+				WillReturnRows(rows)
 			mock.ExpectCommit()
 
 			s := &Storage{}
-			err = s.AddWithdraw(tt.withdraw, tt.login)
+			err = s.AddWithdrawFromBalance(tt.withdraw, tt.login)
 			assert.NoError(t, err)
 		})
 	}

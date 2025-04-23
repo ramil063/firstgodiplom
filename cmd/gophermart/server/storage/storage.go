@@ -29,7 +29,7 @@ type Orderer interface {
 
 type Balancer interface {
 	GetBalance(login string) (balance.Balance, error)
-	AddWithdraw(withdraw balance.Withdraw, login string) error
+	AddWithdrawFromBalance(withdraw balance.Withdraw, login string) error
 }
 
 type Withdrawaler interface {

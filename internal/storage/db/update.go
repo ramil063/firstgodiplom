@@ -49,6 +49,7 @@ func (s *Storage) UpdateOrderAccrual(orderFromAccrual accrualStorage.Order) erro
 	if err != nil {
 		return err
 	}
+	defer tx.Rollback(context.Background())
 
 	resultUpdateOrderAccrual, err := orderRepository.UpdateOrderAccrual(tx, orderFromAccrual.Order, orderFromAccrual.Accrual, internalOrderStatus)
 	if err != nil {
@@ -86,23 +87,12 @@ func (s *Storage) UpdateOrderAccrual(orderFromAccrual accrualStorage.Order) erro
 		return errors.New("error in sql empty result")
 	}
 
-	resultOperatingBalance, err := balanceRepository.OperatingBalance(tx, orderFromAccrual.Accrual, "+", orderEntity.UserLogin)
+	_, err = balanceRepository.OperatingBalance(tx, orderFromAccrual.Accrual, "+", orderEntity.UserLogin)
 	if err != nil {
 		_ = tx.Rollback(context.Background())
 		return err
 	}
-	if resultOperatingBalance == nil {
-		_ = tx.Rollback(context.Background())
-		logger.WriteErrorLog("OperatingBalance error in sql empty result")
-		return errors.New("error in sql empty result")
-	}
 
-	rows = resultOperatingBalance.RowsAffected()
-	if rows != 1 {
-		_ = tx.Rollback(context.Background())
-		logger.WriteErrorLog("OperatingBalance error expected to affect 1 row")
-		return errors.New("expected to affect 1 row")
-	}
 	err = tx.Commit(context.Background())
 	return err
 }

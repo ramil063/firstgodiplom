@@ -92,12 +92,13 @@ func TestStorage_UpdateOrderAccrual(t *testing.T) {
 				WithArgs(tt.orderFromAccrual.UserLogin).
 				WillReturnRows(rowsBalance)
 
-			expectedCommandTagOperatingOrder := pgconn.CommandTag("UPDATE 0 1")
-			mock.ExpectExec(`.*UPDATE balance.*`).
+			rows = mock.NewRows([]string{"value"}).
+				AddRow(tt.orderFromAccrual.Accrual)
+			mock.ExpectQuery(`.*UPDATE balance.*`).
 				WithArgs(
 					tt.orderFromAccrual.Accrual,
 					tt.orderFromAccrual.UserLogin).
-				WillReturnResult(expectedCommandTagOperatingOrder)
+				WillReturnRows(rows)
 
 			mock.ExpectCommit()
 			s := &Storage{}

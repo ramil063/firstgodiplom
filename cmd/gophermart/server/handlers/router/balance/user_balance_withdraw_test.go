@@ -54,13 +54,11 @@ func TestAddWithdraw(t *testing.T) {
 				AccessTokenExpiredAt: time.Now().Add(time.Minute).Unix(),
 			}
 			storageMock.EXPECT().GetAccessTokenData(tt.accessToken).Return(token, nil)
-			balanceMock := tt.balance
-			storageMock.EXPECT().GetBalance(tt.login).Return(balanceMock, nil)
 			withdrawMock := balance.Withdraw{
 				OrderNumber: tt.orderNumber,
 				Sum:         tt.sumWithdraw,
 			}
-			storageMock.EXPECT().AddWithdraw(withdrawMock, tt.login).Return(nil)
+			storageMock.EXPECT().AddWithdrawFromBalance(withdrawMock, tt.login).Return(nil)
 
 			sumStr := strconv.FormatFloat(float64(tt.sumWithdraw), 'f', -1, 32)
 			body := []byte("{\n    \"order\": \"" + tt.orderNumber + "\",\n    \"sum\": " + sumStr + "\n}")

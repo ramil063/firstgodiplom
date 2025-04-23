@@ -10,6 +10,7 @@ import (
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage/models/user"
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage/models/user/balance"
 	orderStatus "github.com/ramil063/firstgodiplom/internal/constants/status"
+	internalErrors "github.com/ramil063/firstgodiplom/internal/errors"
 	"github.com/ramil063/firstgodiplom/internal/logger"
 	balanceRepository "github.com/ramil063/firstgodiplom/internal/storage/db/dml/balance"
 	orderRepository "github.com/ramil063/firstgodiplom/internal/storage/db/dml/order"
@@ -25,6 +26,7 @@ func (s *Storage) AddUserData(register user.Register, passwordHash string) error
 	if err != nil {
 		return err
 	}
+	defer tx.Rollback(context.Background())
 
 	result, err := userRepository.AddUser(tx, register.Login, passwordHash, register.Name)
 	if err != nil {
@@ -98,8 +100,8 @@ func (s *Storage) AddOrder(number string, tokenData user.AccessTokenData) error 
 	return nil
 }
 
-// AddWithdraw добавить списание баллов
-func (s *Storage) AddWithdraw(withdraw balance.Withdraw, login string) error {
+// AddWithdrawFromBalance списание баллов с баланса
+func (s *Storage) AddWithdrawFromBalance(withdraw balance.Withdraw, login string) error {
 
 	now := time.Now()
 	rfc3339Time := now.Format(time.RFC3339)
@@ -107,6 +109,24 @@ func (s *Storage) AddWithdraw(withdraw balance.Withdraw, login string) error {
 	tx, err := repository.DBRepository.Pool.BeginTx(context.Background(), pgx.TxOptions{})
 	if err != nil {
 		return err
+	}
+	defer tx.Rollback(context.Background())
+
+	balanceData, err := balanceRepository.GetBalance(tx, login)
+	if err != nil {
+		_ = tx.Rollback(context.Background())
+		logger.WriteErrorLog("GetBalance error in sql empty result")
+		return err
+	}
+
+	if balanceData.Current < 0 {
+		_ = tx.Rollback(context.Background())
+		return errors.New("balance under 0")
+	}
+
+	if balanceData.Current < withdraw.Sum {
+		_ = tx.Rollback(context.Background())
+		return internalErrors.ErrNotEnoughBalance
 	}
 
 	result, err := withdrawRepository.AddWithdraw(tx, withdraw.OrderNumber, withdraw.Sum, rfc3339Time, login)
@@ -131,7 +151,7 @@ func (s *Storage) AddWithdraw(withdraw balance.Withdraw, login string) error {
 		return errors.New("expected to affect 1 row")
 	}
 
-	result, err = balanceRepository.OperatingBalance(tx, withdraw.Sum, "-", login)
+	_, err = balanceRepository.OperatingBalance(tx, withdraw.Sum, "-", login)
 	if err != nil {
 		errTx := tx.Rollback(context.Background())
 		if errTx != nil {
@@ -140,18 +160,6 @@ func (s *Storage) AddWithdraw(withdraw balance.Withdraw, login string) error {
 		return err
 	}
 
-	if result == nil {
-		_ = tx.Rollback(context.Background())
-		logger.WriteErrorLog("AddWithdraw OperatingBalance error in sql empty result")
-		return errors.New("error in sql empty result")
-	}
-
-	rows = result.RowsAffected()
-	if rows != 1 {
-		_ = tx.Rollback(context.Background())
-		logger.WriteErrorLog("AddWithdraw OperatingBalance error expected to affect 1 row")
-		return errors.New("expected to affect 1 row")
-	}
 	err = tx.Commit(context.Background())
 	if err != nil {
 		return err
