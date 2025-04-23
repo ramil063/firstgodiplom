@@ -112,10 +112,10 @@ func (s *Storage) AddWithdrawFromBalance(withdraw balance.Withdraw, login string
 	}
 	defer tx.Rollback(context.Background())
 
-	balanceData, err := balanceRepository.GetBalance(tx, login)
+	balanceData, err := balanceRepository.GetBalanceForUpdate(tx, login)
 	if err != nil {
 		_ = tx.Rollback(context.Background())
-		logger.WriteErrorLog("GetBalance error in sql empty result")
+		logger.WriteErrorLog("GetBalanceForUpdate error in sql empty result")
 		return err
 	}
 

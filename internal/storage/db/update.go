@@ -75,15 +75,15 @@ func (s *Storage) UpdateOrderAccrual(orderFromAccrual accrualStorage.Order) erro
 		return err
 	}
 
-	balance, err := balanceRepository.GetBalance(tx, orderEntity.UserLogin)
+	balance, err := balanceRepository.GetBalanceForUpdate(tx, orderEntity.UserLogin)
 	if err != nil {
 		_ = tx.Rollback(context.Background())
-		logger.WriteErrorLog("GetBalance error in sql")
+		logger.WriteErrorLog("GetBalanceForUpdate error in sql")
 		return err
 	}
 	if balance.ID == 0 {
 		_ = tx.Rollback(context.Background())
-		logger.WriteErrorLog("GetBalance error in sql")
+		logger.WriteErrorLog("GetBalanceForUpdate error in sql")
 		return errors.New("error in sql empty result")
 	}
 

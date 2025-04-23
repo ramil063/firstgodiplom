@@ -30,8 +30,8 @@ func OperatingBalance(tx pgx.Tx, sum float32, operator string, login string) (fl
 	return newBalance, err
 }
 
-// GetBalance получение баланса
-func GetBalance(tx pgx.Tx, login string) (balance.Balance, error) {
+// GetBalanceForUpdate получение баланса
+func GetBalanceForUpdate(tx pgx.Tx, login string) (balance.Balance, error) {
 	var b balance.Balance
 	row := tx.QueryRow(
 		context.Background(),
@@ -42,7 +42,8 @@ func GetBalance(tx pgx.Tx, login string) (balance.Balance, error) {
 						 LEFT JOIN users u ON u.id = b.user_id
 						 LEFT JOIN withdraw w ON w.user_id = b.user_id
 				WHERE u.login = $1
-				LIMIT 1`,
+				LIMIT 1
+				FOR UPDATE OF b`,
 		login)
 	err := row.Scan(&b.ID, &b.Current, &b.Withdrawn)
 	return b, err

@@ -90,7 +90,7 @@ func TestGetBalance(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			got, err := GetBalance(tx, tt.login)
+			got, err := GetBalanceForUpdate(tx, tt.login)
 			assert.Equal(t, got.ID, expectedBalance.ID)
 			assert.Equal(t, got.Current, expectedBalance.Current)
 			assert.Equal(t, got.Withdrawn, expectedBalance.Withdrawn)
