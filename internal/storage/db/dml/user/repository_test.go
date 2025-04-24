@@ -51,7 +51,7 @@ func TestAddUser(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			_, err = AddUser(tx, tt.login, tt.password, tt.userName)
+			_, err = AddUser(context.Background(), tx, tt.login, tt.password, tt.userName)
 			assert.NoError(t, err)
 		})
 	}

@@ -2,6 +2,7 @@ package router
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -39,7 +40,7 @@ func Test_userRegister(t *testing.T) {
 			Login:    tt.login,
 			Password: tt.password,
 		}
-		storageMock.EXPECT().AddUserData(userMock, gomock.Any()).Return(nil)
+		storageMock.EXPECT().AddUserData(context.Background(), userMock, gomock.Any()).Return(nil)
 		storageMock.EXPECT().UpdateToken("ramil", gomock.Any(), gomock.Any()).Return(nil)
 
 		body := []byte("{\n    \"login\": \"" + tt.login + "\",\n    \"password\": \"" + tt.password + "\"\n}")

@@ -120,7 +120,7 @@ func TestStorage_AddUserData(t *testing.T) {
 			mock.ExpectCommit()
 
 			s := &Storage{}
-			err = s.AddUserData(tt.register, tt.passwordHash)
+			err = s.AddUserData(context.Background(), tt.register, tt.passwordHash)
 			assert.NoError(t, err)
 		})
 	}

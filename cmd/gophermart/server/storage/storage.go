@@ -1,6 +1,8 @@
 package storage
 
 import (
+	"context"
+
 	accrualStorage "github.com/ramil063/firstgodiplom/cmd/gophermart/agent/accrual/storage"
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage/models/auth"
 	"github.com/ramil063/firstgodiplom/cmd/gophermart/server/storage/models/user"
@@ -15,7 +17,7 @@ type Tokener interface {
 
 type Userer interface {
 	GetUser(login string) (user.User, error)
-	AddUserData(r user.Register, hash string) error
+	AddUserData(ctx context.Context, r user.Register, hash string) error
 }
 
 type Orderer interface {

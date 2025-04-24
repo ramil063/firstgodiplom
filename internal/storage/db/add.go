@@ -20,51 +20,51 @@ import (
 )
 
 // AddUserData добавить пользователя и добавить его баланс
-func (s *Storage) AddUserData(register user.Register, passwordHash string) error {
+func (s *Storage) AddUserData(ctx context.Context, register user.Register, passwordHash string) error {
 
-	tx, err := repository.DBRepository.Pool.BeginTx(context.Background(), pgx.TxOptions{})
+	tx, err := repository.DBRepository.Pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(context.Background())
+	defer tx.Rollback(ctx)
 
-	result, err := userRepository.AddUser(tx, register.Login, passwordHash, register.Name)
+	result, err := userRepository.AddUser(ctx, tx, register.Login, passwordHash, register.Name)
 	if err != nil {
-		_ = tx.Rollback(context.Background())
+		_ = tx.Rollback(ctx)
 		return err
 	}
 	if result == nil {
-		_ = tx.Rollback(context.Background())
+		_ = tx.Rollback(ctx)
 		logger.WriteErrorLog("AddUser error in sql empty result")
 		return errors.New("error in sql empty result")
 	}
 
 	rows := result.RowsAffected()
 	if rows != 1 {
-		_ = tx.Rollback(context.Background())
+		_ = tx.Rollback(ctx)
 		logger.WriteErrorLog("AddUser error expected to affect 1 row")
 		return errors.New("expected to affect 1 row")
 	}
 
 	result, err = balanceRepository.AddBalance(tx, register.Login)
 	if err != nil {
-		_ = tx.Rollback(context.Background())
+		_ = tx.Rollback(ctx)
 		return err
 	}
 	if result == nil {
-		_ = tx.Rollback(context.Background())
+		_ = tx.Rollback(ctx)
 		logger.WriteErrorLog("AddBalance error in sql empty result")
 		return errors.New("error in sql empty result")
 	}
 
 	rows = result.RowsAffected()
 	if rows != 1 {
-		_ = tx.Rollback(context.Background())
+		_ = tx.Rollback(ctx)
 		logger.WriteErrorLog("AddBalance error expected to affect 1 row")
 		return errors.New("expected to affect 1 row")
 	}
 
-	err = tx.Commit(context.Background())
+	err = tx.Commit(ctx)
 	if err != nil {
 		return err
 	}

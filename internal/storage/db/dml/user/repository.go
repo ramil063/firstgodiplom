@@ -13,9 +13,9 @@ import (
 )
 
 // AddUser добавить пользователя
-func AddUser(tx pgx.Tx, login string, password string, name string) (pgconn.CommandTag, error) {
+func AddUser(ctx context.Context, tx pgx.Tx, login string, password string, name string) (pgconn.CommandTag, error) {
 	exec, err := tx.Exec(
-		context.Background(),
+		ctx,
 		"INSERT INTO users (login, password, name) VALUES ($1, $2, $3)",
 		login,
 		password,

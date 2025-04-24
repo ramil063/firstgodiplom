@@ -42,7 +42,7 @@ func userRegister(rw http.ResponseWriter, r *http.Request, s storage.Storager) {
 		return
 	}
 
-	err = s.AddUserData(register, passwordHash)
+	err = s.AddUserData(r.Context(), register, passwordHash)
 
 	if errors.Is(err, internalErrors.ErrUniqueViolation) {
 		logger.WriteErrorLog(err.Error())
