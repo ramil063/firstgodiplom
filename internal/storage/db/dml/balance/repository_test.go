@@ -79,7 +79,7 @@ func TestGetBalance(t *testing.T) {
 			rows := mock.NewRows([]string{"id", "balance", "sum"}).
 				AddRow(expectedBalance.ID, expectedBalance.Current, expectedBalance.Withdrawn)
 
-			mock.ExpectQuery(`SELECT b.id, "value"::DECIMAL as balance, COALESCE.*WHERE u.login = \$1`).
+			mock.ExpectQuery(`SELECT b.id, "value"::DECIMAL as balance, .*WHERE u.login = \$1`).
 				WithArgs(tt.login).
 				WillReturnRows(rows)
 

@@ -163,7 +163,7 @@ func TestStorage_AddWithdrawFromBalance(t *testing.T) {
 			rows := mock.NewRows([]string{"id", "balance", "sum"}).
 				AddRow(tt.expectedBalance.ID, tt.expectedBalance.Current, tt.expectedBalance.Withdrawn)
 
-			mock.ExpectQuery(`SELECT b.id, "value"::DECIMAL as balance, COALESCE.*WHERE u.login = \$1`).
+			mock.ExpectQuery(`SELECT b.id, "value"::DECIMAL as balance, .*WHERE u.login = \$1`).
 				WithArgs(tt.login).
 				WillReturnRows(rows)
 

@@ -37,7 +37,9 @@ func GetBalanceForUpdate(tx pgx.Tx, login string) (balance.Balance, error) {
 		context.Background(),
 		`SELECT b.id,
 					   "value"::DECIMAL as balance,
-					   COALESCE(sum(w.sum) OVER (PARTITION BY b.id), 0::DECIMAL) as sum
+					   (SELECT COALESCE(SUM(w.sum), 0::DECIMAL) 
+						FROM withdraw w 
+						WHERE w.user_id = b.user_id) as sum
 				FROM balance b
 						 LEFT JOIN users u ON u.id = b.user_id
 						 LEFT JOIN withdraw w ON w.user_id = b.user_id
