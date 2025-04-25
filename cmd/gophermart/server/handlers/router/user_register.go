@@ -56,7 +56,7 @@ func userRegister(rw http.ResponseWriter, r *http.Request, s storage.Storager) {
 	}
 
 	var t auth.Token
-	t, err = authHandlers.AuthenticateUser(s, register.Login)
+	t, err = authHandlers.AuthenticateUser(r.Context(), s, register.Login)
 	if err != nil {
 		logger.WriteErrorLog(err.Error())
 		rw.WriteHeader(http.StatusInternalServerError)

@@ -57,7 +57,7 @@ func AddWithdraw(rw http.ResponseWriter, r *http.Request, dbs storage.Storager) 
 		return
 	}
 
-	err = dbs.AddWithdrawFromBalance(withdraw, tokenData.Login)
+	err = dbs.AddWithdrawFromBalance(r.Context(), withdraw, tokenData.Login)
 	if errors.Is(err, internalErrors.ErrNotEnoughBalance) {
 		logger.WriteErrorLog("not enough balance")
 		rw.WriteHeader(http.StatusPaymentRequired)

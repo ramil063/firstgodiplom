@@ -1,6 +1,7 @@
 package balance
 
 import (
+	"context"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -39,9 +40,9 @@ func TestGetBalance(t *testing.T) {
 				AccessToken:          "123",
 				AccessTokenExpiredAt: time.Now().Add(time.Minute).Unix(),
 			}
-			storageMock.EXPECT().GetAccessTokenData("123").Return(token, nil)
+			storageMock.EXPECT().GetAccessTokenData(context.Background(), "123").Return(token, nil)
 			balanceMock := balance.Balance{}
-			storageMock.EXPECT().GetBalance("ramil").Return(balanceMock, nil)
+			storageMock.EXPECT().GetBalance(gomock.Any(), "ramil").Return(balanceMock, nil)
 
 			request := httptest.NewRequest("GET", "/api/user/balance", nil)
 			request.Header.Set("Authorization", "Bearer 123")

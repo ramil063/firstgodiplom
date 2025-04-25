@@ -20,7 +20,7 @@ func GetBalance(rw http.ResponseWriter, r *http.Request, s storage.Storager) {
 		return
 	}
 
-	balance, err := s.GetBalance(tokenData.Login)
+	balance, err := s.GetBalance(r.Context(), tokenData.Login)
 	if err != nil {
 		logger.WriteErrorLog(err.Error())
 		rw.WriteHeader(http.StatusInternalServerError)

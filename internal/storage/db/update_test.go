@@ -102,7 +102,7 @@ func TestStorage_UpdateOrderAccrual(t *testing.T) {
 
 			mock.ExpectCommit()
 			s := &Storage{}
-			err = s.UpdateOrderAccrual(tt.orderFromAccrual)
+			err = s.UpdateOrderAccrual(context.Background(), tt.orderFromAccrual)
 			assert.NoError(t, err)
 		})
 	}
@@ -135,7 +135,7 @@ func TestStorage_UpdateOrderCheckAccrualAfter(t *testing.T) {
 					tt.orderNumber).
 				Return(expectedCommandTag, nil)
 			s := &Storage{}
-			err := s.UpdateOrderCheckAccrualAfter(tt.orderNumber)
+			err := s.UpdateOrderCheckAccrualAfter(context.Background(), tt.orderNumber)
 			assert.NoError(t, err)
 		})
 	}
@@ -173,7 +173,7 @@ func TestStorage_UpdateToken(t *testing.T) {
 					tt.login).
 				Return(expectedCommandTag, nil)
 			s := &Storage{}
-			err := s.UpdateToken(tt.login, tt.token, tt.expiredAt)
+			err := s.UpdateToken(context.Background(), tt.login, tt.token, tt.expiredAt)
 			assert.NoError(t, err)
 		})
 	}

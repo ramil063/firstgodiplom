@@ -41,7 +41,7 @@ func Test_userRegister(t *testing.T) {
 			Password: tt.password,
 		}
 		storageMock.EXPECT().AddUserData(context.Background(), userMock, gomock.Any()).Return(nil)
-		storageMock.EXPECT().UpdateToken("ramil", gomock.Any(), gomock.Any()).Return(nil)
+		storageMock.EXPECT().UpdateToken(context.Background(), "ramil", gomock.Any(), gomock.Any()).Return(nil)
 
 		body := []byte("{\n    \"login\": \"" + tt.login + "\",\n    \"password\": \"" + tt.password + "\"\n}")
 		request := httptest.NewRequest("POST", "/api/user/register", bytes.NewReader(body))

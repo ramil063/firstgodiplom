@@ -30,7 +30,7 @@ func userLogin(rw http.ResponseWriter, r *http.Request, dbs storage.Storager) {
 	logMsg, _ := json.Marshal(login)
 	logger.WriteInfoLog(string(logMsg))
 
-	u, err := dbs.GetUser(login.Login)
+	u, err := dbs.GetUser(r.Context(), login.Login)
 
 	if errors.Is(err, pgx.ErrNoRows) || !hash.CheckPasswordHash(login.Password, u.PasswordHash) {
 		logger.WriteErrorLog("login/password incorrect")
@@ -44,7 +44,7 @@ func userLogin(rw http.ResponseWriter, r *http.Request, dbs storage.Storager) {
 	}
 
 	var t auth.Token
-	t, err = authHandlers.AuthenticateUser(dbs, login.Login)
+	t, err = authHandlers.AuthenticateUser(r.Context(), dbs, login.Login)
 	if err != nil {
 		logger.WriteErrorLog(err.Error())
 		rw.WriteHeader(http.StatusInternalServerError)

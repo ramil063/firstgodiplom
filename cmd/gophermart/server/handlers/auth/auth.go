@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"strings"
@@ -16,7 +17,7 @@ import (
 )
 
 // AuthenticateUser аутентифицировать пользователя
-func AuthenticateUser(s storage.Storager, login string) (auth.Token, error) {
+func AuthenticateUser(ctx context.Context, s storage.Storager, login string) (auth.Token, error) {
 	var err error
 	var t auth.Token
 
@@ -26,15 +27,15 @@ func AuthenticateUser(s storage.Storager, login string) (auth.Token, error) {
 	}
 
 	expiredAt := time.Now().Unix() + auth.TokenExpiredSeconds
-	err = s.UpdateToken(login, t, expiredAt)
+	err = s.UpdateToken(ctx, login, t, expiredAt)
 	return t, err
 }
 
 // CheckAuthenticatedUser проверка пользователя на аутентификацию
-func CheckAuthenticatedUser(s storage.Storager, token string) (user.AccessTokenData, error) {
+func CheckAuthenticatedUser(ctx context.Context, s storage.Storager, token string) (user.AccessTokenData, error) {
 	var err error
 	var tokenData user.AccessTokenData
-	tokenData, err = s.GetAccessTokenData(token)
+	tokenData, err = s.GetAccessTokenData(ctx, token)
 
 	if errors.Is(err, pgx.ErrNoRows) {
 		return tokenData, internalErrors.ErrIncorrectToken

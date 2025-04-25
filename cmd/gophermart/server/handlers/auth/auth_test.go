@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -31,9 +32,9 @@ func TestAuthenticateUser(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			storageMock := storage2.NewMockStorager(ctrl)
-			storageMock.EXPECT().UpdateToken("ramil", gomock.Any(), gomock.Any()).Return(nil)
+			storageMock.EXPECT().UpdateToken(context.Background(), "ramil", gomock.Any(), gomock.Any()).Return(nil)
 
-			got, err := AuthenticateUser(storageMock, "ramil")
+			got, err := AuthenticateUser(context.Background(), storageMock, "ramil")
 			assert.Equal(t, tt.want, reflect.ValueOf(got).Type().String())
 			assert.NoError(t, err)
 		})
@@ -55,9 +56,9 @@ func TestCheckAuthenticatedUser(t *testing.T) {
 			var td user.AccessTokenData
 			td.AccessTokenExpiredAt = time.Now().Add(time.Minute).Unix()
 			storageMock := storage2.NewMockStorager(ctrl)
-			storageMock.EXPECT().GetAccessTokenData(tt.token).Return(td, nil)
+			storageMock.EXPECT().GetAccessTokenData(context.Background(), tt.token).Return(td, nil)
 
-			_, err := CheckAuthenticatedUser(storageMock, tt.token)
+			_, err := CheckAuthenticatedUser(context.Background(), storageMock, tt.token)
 			assert.NoError(t, err)
 		})
 	}

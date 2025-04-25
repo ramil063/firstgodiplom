@@ -14,9 +14,9 @@ import (
 )
 
 // AddOrder добавление заказа
-func AddOrder(dbr *repository.Repository, number string, accrual float32, statusID int, uploadedAt string, userID int) (pgconn.CommandTag, error) {
+func AddOrder(ctx context.Context, dbr *repository.Repository, number string, accrual float32, statusID int, uploadedAt string, userID int) (pgconn.CommandTag, error) {
 	exec, err := dbr.ExecContext(
-		context.Background(),
+		ctx,
 		`INSERT INTO "order" (number, accrual, status_id, uploaded_at, user_id) VALUES ($1, $2, $3, $4, $5)`,
 		number,
 		accrual,
@@ -35,9 +35,9 @@ func AddOrder(dbr *repository.Repository, number string, accrual float32, status
 }
 
 // UpdateOrderAccrual обновление начисления в заказе
-func UpdateOrderAccrual(tx pgx.Tx, number string, accrual float32, statusID int) (pgconn.CommandTag, error) {
+func UpdateOrderAccrual(ctx context.Context, tx pgx.Tx, number string, accrual float32, statusID int) (pgconn.CommandTag, error) {
 	exec, err := tx.Exec(
-		context.Background(),
+		ctx,
 		`
 			UPDATE "order" 
 			SET "accrual" = $1, "status_id" = $2 
@@ -53,9 +53,9 @@ func UpdateOrderAccrual(tx pgx.Tx, number string, accrual float32, statusID int)
 }
 
 // UpdateOrderCheckAccrualAfter обновление поля даты следующей проверки заказа в акруал
-func UpdateOrderCheckAccrualAfter(dbr *repository.Repository, number string, checkAccrualAfter int64) (pgconn.CommandTag, error) {
+func UpdateOrderCheckAccrualAfter(ctx context.Context, dbr *repository.Repository, number string, checkAccrualAfter int64) (pgconn.CommandTag, error) {
 	exec, err := dbr.ExecContext(
-		context.Background(),
+		ctx,
 		`UPDATE "order" SET "check_accrual_after" = $1 WHERE number = $2`,
 		checkAccrualAfter,
 		number)
@@ -67,10 +67,10 @@ func UpdateOrderCheckAccrualAfter(dbr *repository.Repository, number string, che
 }
 
 // GetOrder получение заказа
-func GetOrder(tx pgx.Tx, number string) (user.Order, error) {
+func GetOrder(ctx context.Context, tx pgx.Tx, number string) (user.Order, error) {
 	var o user.Order
 	row := tx.QueryRow(
-		context.Background(),
+		ctx,
 		`SELECT o.id, number, accrual::DECIMAL, s.alias, uploaded_at, u.login
 				FROM "order" o
 				LEFT JOIN users u ON u.id = o.user_id

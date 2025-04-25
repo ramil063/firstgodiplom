@@ -20,7 +20,7 @@ func getWithdrawals(rw http.ResponseWriter, r *http.Request, dbs storage.Storage
 		return
 	}
 
-	withdrawals, err := dbs.GetWithdrawals(tokenData.Login)
+	withdrawals, err := dbs.GetWithdrawals(r.Context(), tokenData.Login)
 	if err != nil {
 		logger.WriteErrorLog(err.Error())
 		rw.WriteHeader(http.StatusInternalServerError)

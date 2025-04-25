@@ -1,6 +1,7 @@
 package router
 
 import (
+	"context"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -43,9 +44,9 @@ func Test_getWithdrawals(t *testing.T) {
 				AccessToken:          tt.accessToken,
 				AccessTokenExpiredAt: time.Now().Add(time.Minute).Unix(),
 			}
-			storageMock.EXPECT().GetAccessTokenData(tt.accessToken).Return(token, nil)
+			storageMock.EXPECT().GetAccessTokenData(context.Background(), tt.accessToken).Return(token, nil)
 			withdrawalsMock := []balance.Withdraw{{}}
-			storageMock.EXPECT().GetWithdrawals(tt.login).Return(withdrawalsMock, nil)
+			storageMock.EXPECT().GetWithdrawals(gomock.Any(), tt.login).Return(withdrawalsMock, nil)
 
 			request := httptest.NewRequest("GET", "/api/user/withdrawals", nil)
 			request.Header.Set("Authorization", "Bearer "+tt.accessToken)

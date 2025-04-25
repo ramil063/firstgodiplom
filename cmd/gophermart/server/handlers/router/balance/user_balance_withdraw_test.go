@@ -2,6 +2,7 @@ package balance
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -53,12 +54,12 @@ func TestAddWithdraw(t *testing.T) {
 				AccessToken:          tt.accessToken,
 				AccessTokenExpiredAt: time.Now().Add(time.Minute).Unix(),
 			}
-			storageMock.EXPECT().GetAccessTokenData(tt.accessToken).Return(token, nil)
+			storageMock.EXPECT().GetAccessTokenData(context.Background(), tt.accessToken).Return(token, nil)
 			withdrawMock := balance.Withdraw{
 				OrderNumber: tt.orderNumber,
 				Sum:         tt.sumWithdraw,
 			}
-			storageMock.EXPECT().AddWithdrawFromBalance(withdrawMock, tt.login).Return(nil)
+			storageMock.EXPECT().AddWithdrawFromBalance(gomock.Any(), withdrawMock, tt.login).Return(nil)
 
 			sumStr := strconv.FormatFloat(float64(tt.sumWithdraw), 'f', -1, 32)
 			body := []byte("{\n    \"order\": \"" + tt.orderNumber + "\",\n    \"sum\": " + sumStr + "\n}")

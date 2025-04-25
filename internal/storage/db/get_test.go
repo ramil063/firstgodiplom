@@ -82,7 +82,7 @@ func TestStorage_GetAccessTokenData(t *testing.T) {
 				})
 
 			s := &Storage{}
-			_, err = s.GetAccessTokenData(tt.token)
+			_, err = s.GetAccessTokenData(context.Background(), tt.token)
 			assert.NoError(t, err)
 		})
 	}
@@ -127,7 +127,7 @@ func TestStorage_GetAllOrdersInStatuses(t *testing.T) {
 
 			s := &Storage{}
 
-			_, err = s.GetAllOrdersInStatuses(tt.statuses)
+			_, err = s.GetAllOrdersInStatuses(context.Background(), tt.statuses)
 			assert.NoError(t, err)
 		})
 	}
@@ -173,7 +173,7 @@ func TestStorage_GetBalance(t *testing.T) {
 					},
 				})
 			s := &Storage{}
-			_, err = s.GetBalance(tt.login)
+			_, err = s.GetBalance(context.Background(), tt.login)
 			assert.NoError(t, err)
 		})
 	}
@@ -227,7 +227,7 @@ func TestStorage_GetOrder(t *testing.T) {
 					},
 				})
 			s := &Storage{}
-			_, err = s.GetOrder(tt.number)
+			_, err = s.GetOrder(context.Background(), tt.number)
 			assert.NoError(t, err)
 		})
 	}
@@ -270,7 +270,7 @@ func TestStorage_GetOrders(t *testing.T) {
 				WillReturnRows(rows)
 
 			s := &Storage{}
-			_, err = s.GetOrders(tt.login)
+			_, err = s.GetOrders(context.Background(), tt.login)
 			assert.NoError(t, err)
 		})
 	}
@@ -320,7 +320,7 @@ func TestStorage_GetUser(t *testing.T) {
 					},
 				})
 			s := &Storage{}
-			_, err = s.GetUser(tt.login)
+			_, err = s.GetUser(context.Background(), tt.login)
 			assert.NoError(t, err)
 		})
 	}
@@ -362,7 +362,7 @@ func TestStorage_GetWithdrawals(t *testing.T) {
 				WillReturnRows(rows)
 
 			s := &Storage{}
-			_, err = s.GetWithdrawals(tt.login)
+			_, err = s.GetWithdrawals(context.Background(), tt.login)
 			assert.NoError(t, err)
 		})
 	}

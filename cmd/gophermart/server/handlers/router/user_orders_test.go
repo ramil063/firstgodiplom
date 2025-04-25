@@ -2,6 +2,7 @@ package router
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -43,9 +44,9 @@ func Test_getOrders(t *testing.T) {
 				AccessToken:          tt.accessToken,
 				AccessTokenExpiredAt: time.Now().Add(time.Minute).Unix(),
 			}
-			storageMock.EXPECT().GetAccessTokenData(tt.accessToken).Return(token, nil)
+			storageMock.EXPECT().GetAccessTokenData(context.Background(), tt.accessToken).Return(token, nil)
 			ordersMock := []user.Order{{}}
-			storageMock.EXPECT().GetOrders(tt.login).Return(ordersMock, nil)
+			storageMock.EXPECT().GetOrders(gomock.Any(), tt.login).Return(ordersMock, nil)
 
 			request := httptest.NewRequest("GET", "/api/user/orders", nil)
 			request.Header.Set("Authorization", "Bearer "+tt.accessToken)
@@ -98,15 +99,15 @@ func Test_putOrder(t *testing.T) {
 				AccessToken:          tt.accessToken,
 				AccessTokenExpiredAt: time.Now().Add(time.Minute).Unix(),
 			}
-			storageMock.EXPECT().GetAccessTokenData(tt.accessToken).Return(token, nil)
+			storageMock.EXPECT().GetAccessTokenData(context.Background(), tt.accessToken).Return(token, nil)
 			ordersMock := user.Order{}
-			storageMock.EXPECT().GetOrder(tt.orderNumber).Return(ordersMock, nil)
+			storageMock.EXPECT().GetOrder(gomock.Any(), tt.orderNumber).Return(ordersMock, nil)
 			accessTokenData := user.AccessTokenData{
 				Login:                tt.login,
 				AccessToken:          tt.accessToken,
 				AccessTokenExpiredAt: time.Now().Add(time.Minute).Unix(),
 			}
-			storageMock.EXPECT().AddOrder(tt.orderNumber, accessTokenData).Return(nil)
+			storageMock.EXPECT().AddOrder(gomock.Any(), tt.orderNumber, accessTokenData).Return(nil)
 
 			body := []byte(tt.orderNumber)
 			request := httptest.NewRequest("POST", "/api/user/orders", bytes.NewReader(body))

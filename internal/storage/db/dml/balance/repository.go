@@ -10,9 +10,9 @@ import (
 )
 
 // OperatingBalance обновление баланса
-func OperatingBalance(tx pgx.Tx, sum float32, operator string, login string) (float32, error) {
+func OperatingBalance(ctx context.Context, tx pgx.Tx, sum float32, operator string, login string) (float32, error) {
 	row := tx.QueryRow(
-		context.Background(),
+		ctx,
 		`
 			UPDATE balance 
 			SET "value" = "value" `+operator+` $1 
@@ -31,10 +31,10 @@ func OperatingBalance(tx pgx.Tx, sum float32, operator string, login string) (fl
 }
 
 // GetBalanceForUpdate получение баланса
-func GetBalanceForUpdate(tx pgx.Tx, login string) (balance.Balance, error) {
+func GetBalanceForUpdate(ctx context.Context, tx pgx.Tx, login string) (balance.Balance, error) {
 	var b balance.Balance
 	row := tx.QueryRow(
-		context.Background(),
+		ctx,
 		`SELECT b.id,
 					   "value"::DECIMAL as balance,
 					   (SELECT COALESCE(SUM(w.sum), 0::DECIMAL) 
@@ -52,9 +52,9 @@ func GetBalanceForUpdate(tx pgx.Tx, login string) (balance.Balance, error) {
 }
 
 // AddBalance добавление баланса
-func AddBalance(tx pgx.Tx, login string) (pgconn.CommandTag, error) {
+func AddBalance(ctx context.Context, tx pgx.Tx, login string) (pgconn.CommandTag, error) {
 	exec, err := tx.Exec(
-		context.Background(),
+		ctx,
 		"INSERT INTO balance (user_id) (SELECT id FROM users WHERE login = $1)",
 		login)
 	return exec, err

@@ -32,9 +32,9 @@ func AddUser(ctx context.Context, tx pgx.Tx, login string, password string, name
 }
 
 // UpdateToken обновить токен авторизации пользователя
-func UpdateToken(dbr *repository.Repository, login string, token string, expiredAt int64) (pgconn.CommandTag, error) {
+func UpdateToken(ctx context.Context, dbr *repository.Repository, login string, token string, expiredAt int64) (pgconn.CommandTag, error) {
 	exec, err := dbr.ExecContext(
-		context.Background(),
+		ctx,
 		"UPDATE users SET access_token = $1, access_token_expired_at = $2 WHERE login = $3",
 		token,
 		expiredAt,

@@ -13,10 +13,10 @@ import (
 )
 
 // GetUser получить пользователя
-func (s *Storage) GetUser(login string) (user.User, error) {
+func (s *Storage) GetUser(ctx context.Context, login string) (user.User, error) {
 	var u user.User
 	row := repository.DBRepository.QueryRowContext(
-		context.Background(),
+		ctx,
 		"SELECT id, login, password, name FROM users WHERE login = $1",
 		login)
 	err := row.Scan(&u.ID, &u.Login, &u.PasswordHash, &u.Name)
@@ -24,11 +24,11 @@ func (s *Storage) GetUser(login string) (user.User, error) {
 }
 
 // GetAccessTokenData получить данные токена авторизации
-func (s *Storage) GetAccessTokenData(token string) (user.AccessTokenData, error) {
+func (s *Storage) GetAccessTokenData(ctx context.Context, token string) (user.AccessTokenData, error) {
 	var t user.AccessTokenData
 	query := "SELECT login, access_token, access_token_expired_at FROM users WHERE access_token = $1"
 	row := repository.DBRepository.QueryRowContext(
-		context.Background(),
+		ctx,
 		query,
 		token)
 	err := row.Scan(&t.Login, &t.AccessToken, &t.AccessTokenExpiredAt)
@@ -36,10 +36,10 @@ func (s *Storage) GetAccessTokenData(token string) (user.AccessTokenData, error)
 }
 
 // GetOrder получить заказ
-func (s *Storage) GetOrder(number string) (user.Order, error) {
+func (s *Storage) GetOrder(ctx context.Context, number string) (user.Order, error) {
 	var o user.Order
 	row := repository.DBRepository.QueryRowContext(
-		context.Background(),
+		ctx,
 		`SELECT o.id, number, accrual::DECIMAL, s.alias, uploaded_at, u.login
 				FROM "order" o
 				LEFT JOIN users u ON u.id = o.user_id
@@ -51,10 +51,10 @@ func (s *Storage) GetOrder(number string) (user.Order, error) {
 }
 
 // GetOrders получить заказы
-func (s *Storage) GetOrders(login string) ([]user.Order, error) {
+func (s *Storage) GetOrders(ctx context.Context, login string) ([]user.Order, error) {
 	var res []user.Order
 	rows, err := repository.DBRepository.QueryContext(
-		context.Background(),
+		ctx,
 		`SELECT number, accrual::DECIMAL, s.alias, uploaded_at
 				FROM "order" o
 				LEFT JOIN users u ON u.id = o.user_id
@@ -90,11 +90,11 @@ func (s *Storage) GetOrders(login string) ([]user.Order, error) {
 }
 
 // GetAllOrdersInStatuses получить все заказы в статусах
-func (s *Storage) GetAllOrdersInStatuses(statuses []int) ([]user.OrderCheckAccrual, error) {
+func (s *Storage) GetAllOrdersInStatuses(ctx context.Context, statuses []int) ([]user.OrderCheckAccrual, error) {
 	var res []user.OrderCheckAccrual
 
 	rows, err := repository.DBRepository.QueryContext(
-		context.Background(),
+		ctx,
 		`SELECT number, accrual::DECIMAL, s.alias
 				FROM "order" o
 				LEFT JOIN status s ON s.id = o.status_id
@@ -132,10 +132,10 @@ func (s *Storage) GetAllOrdersInStatuses(statuses []int) ([]user.OrderCheckAccru
 }
 
 // GetBalance получить баланс пользователя
-func (s *Storage) GetBalance(login string) (balance.Balance, error) {
+func (s *Storage) GetBalance(ctx context.Context, login string) (balance.Balance, error) {
 	var b balance.Balance
 	row := repository.DBRepository.QueryRowContext(
-		context.Background(),
+		ctx,
 		`SELECT
 					"value"::DECIMAL AS balance,
 					COALESCE(SUM(w.sum) OVER(PARTITION BY b.id), 0::DECIMAL) AS sum
@@ -150,10 +150,10 @@ func (s *Storage) GetBalance(login string) (balance.Balance, error) {
 }
 
 // GetWithdrawals получение всех списаний баллов
-func (s *Storage) GetWithdrawals(login string) ([]balance.Withdraw, error) {
+func (s *Storage) GetWithdrawals(ctx context.Context, login string) ([]balance.Withdraw, error) {
 	var res []balance.Withdraw
 	rows, err := repository.DBRepository.QueryContext(
-		context.Background(),
+		ctx,
 		`SELECT "order", "sum", processed_at
 				FROM withdraw w
 				INNER JOIN users u ON u.id = w.user_id

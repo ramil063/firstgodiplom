@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"log"
@@ -48,11 +49,11 @@ func TestOrdersProcess(t *testing.T) {
 				storageMock := storage2.NewMockStorager(ctrl)
 
 				storageMock.EXPECT().
-					GetAllOrdersInStatuses(gomock.Any()).
+					GetAllOrdersInStatuses(context.Background(), gomock.Any()).
 					Return(tt.returnFromStorage, nil)
 
 				storageMock.EXPECT().
-					UpdateOrderAccrual(gomock.Any()).
+					UpdateOrderAccrual(context.Background(), gomock.Any()).
 					Return(nil)
 
 				clientMock := handlers.NewMockClienter(ctrl)
@@ -108,11 +109,11 @@ func TestProcessAccrual(t *testing.T) {
 				storageMock := storage2.NewMockStorager(ctrl)
 
 				storageMock.EXPECT().
-					GetAllOrdersInStatuses(gomock.Any()).
+					GetAllOrdersInStatuses(context.Background(), gomock.Any()).
 					Return(tt.returnFromStorage, nil)
 
 				storageMock.EXPECT().
-					UpdateOrderAccrual(gomock.Any()).
+					UpdateOrderAccrual(context.Background(), gomock.Any()).
 					Return(nil)
 
 				clientMock := handlers.NewMockClienter(ctrl)
@@ -169,7 +170,7 @@ func TestSyncAccrual(t *testing.T) {
 			storageMock := storage2.NewMockStorager(ctrl)
 
 			storageMock.EXPECT().
-				UpdateOrderAccrual(gomock.Any()).
+				UpdateOrderAccrual(context.Background(), gomock.Any()).
 				Return(nil)
 
 			clientMock := handlers.NewMockClienter(ctrl)

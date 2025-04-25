@@ -73,7 +73,7 @@ func TestStorage_AddOrder(t *testing.T) {
 				Return(expectedCommandTag, nil)
 
 			s := &Storage{}
-			err := s.AddOrder(tt.number, tt.tokenData)
+			err := s.AddOrder(context.Background(), tt.number, tt.tokenData)
 			assert.NoError(t, err)
 		})
 	}
@@ -185,7 +185,7 @@ func TestStorage_AddWithdrawFromBalance(t *testing.T) {
 			mock.ExpectCommit()
 
 			s := &Storage{}
-			err = s.AddWithdrawFromBalance(tt.withdraw, tt.login)
+			err = s.AddWithdrawFromBalance(context.Background(), tt.withdraw, tt.login)
 			assert.NoError(t, err)
 		})
 	}

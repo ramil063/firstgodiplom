@@ -52,7 +52,7 @@ func TestAddOrder(t *testing.T) {
 					tt.userID).
 				Return(expectedCommandTag, nil)
 
-			_, err := AddOrder(&dbr, tt.number, tt.accrual, tt.statusID, tt.uploadedAt, tt.userID)
+			_, err := AddOrder(context.Background(), &dbr, tt.number, tt.accrual, tt.statusID, tt.uploadedAt, tt.userID)
 			assert.NoError(t, err)
 		})
 	}
@@ -111,7 +111,7 @@ func TestGetOrder(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			got, err := GetOrder(tx, tt.number)
+			got, err := GetOrder(context.Background(), tx, tt.number)
 			assert.Equal(t, expectedOrder.ID, got.ID)
 			assert.Equal(t, expectedOrder.Number, got.Number)
 			assert.Equal(t, expectedOrder.Status, got.Status)
@@ -161,7 +161,7 @@ func TestUpdateOrderAccrual(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			_, err = UpdateOrderAccrual(tx, tt.number, tt.accrual, tt.statusID)
+			_, err = UpdateOrderAccrual(context.Background(), tx, tt.number, tt.accrual, tt.statusID)
 			assert.NoError(t, err)
 		})
 	}
@@ -196,7 +196,7 @@ func TestUpdateOrderCheckAccrualAfter(t *testing.T) {
 					tt.number).
 				Return(expectedCommandTag, nil)
 
-			_, err := UpdateOrderCheckAccrualAfter(&dbr, tt.number, tt.checkAccrualAfter)
+			_, err := UpdateOrderCheckAccrualAfter(context.Background(), &dbr, tt.number, tt.checkAccrualAfter)
 			assert.NoError(t, err)
 		})
 	}

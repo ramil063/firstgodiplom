@@ -46,7 +46,7 @@ func (s *Storage) AddUserData(ctx context.Context, register user.Register, passw
 		return errors.New("expected to affect 1 row")
 	}
 
-	result, err = balanceRepository.AddBalance(tx, register.Login)
+	result, err = balanceRepository.AddBalance(ctx, tx, register.Login)
 	if err != nil {
 		_ = tx.Rollback(ctx)
 		return err
@@ -72,9 +72,9 @@ func (s *Storage) AddUserData(ctx context.Context, register user.Register, passw
 }
 
 // AddOrder добавить заказ
-func (s *Storage) AddOrder(number string, tokenData user.AccessTokenData) error {
+func (s *Storage) AddOrder(ctx context.Context, number string, tokenData user.AccessTokenData) error {
 
-	u, err := s.GetUser(tokenData.Login)
+	u, err := s.GetUser(ctx, tokenData.Login)
 	if err != nil {
 		return err
 	}
@@ -82,7 +82,7 @@ func (s *Storage) AddOrder(number string, tokenData user.AccessTokenData) error 
 	now := time.Now()
 	rfc3339Time := now.Format(time.RFC3339)
 
-	result, err := orderRepository.AddOrder(&repository.DBRepository, number, 0, orderStatus.NewID, rfc3339Time, u.ID)
+	result, err := orderRepository.AddOrder(ctx, &repository.DBRepository, number, 0, orderStatus.NewID, rfc3339Time, u.ID)
 	if err != nil {
 		return err
 	}
@@ -101,37 +101,37 @@ func (s *Storage) AddOrder(number string, tokenData user.AccessTokenData) error 
 }
 
 // AddWithdrawFromBalance списание баллов с баланса
-func (s *Storage) AddWithdrawFromBalance(withdraw balance.Withdraw, login string) error {
+func (s *Storage) AddWithdrawFromBalance(ctx context.Context, withdraw balance.Withdraw, login string) error {
 
 	now := time.Now()
 	rfc3339Time := now.Format(time.RFC3339)
 
-	tx, err := repository.DBRepository.Pool.BeginTx(context.Background(), pgx.TxOptions{})
+	tx, err := repository.DBRepository.Pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(context.Background())
+	defer tx.Rollback(ctx)
 
-	balanceData, err := balanceRepository.GetBalanceForUpdate(tx, login)
+	balanceData, err := balanceRepository.GetBalanceForUpdate(ctx, tx, login)
 	if err != nil {
-		_ = tx.Rollback(context.Background())
+		_ = tx.Rollback(ctx)
 		logger.WriteErrorLog("GetBalanceForUpdate error in sql empty result")
 		return err
 	}
 
 	if balanceData.Current < 0 {
-		_ = tx.Rollback(context.Background())
+		_ = tx.Rollback(ctx)
 		return errors.New("balance under 0")
 	}
 
 	if balanceData.Current < withdraw.Sum {
-		_ = tx.Rollback(context.Background())
+		_ = tx.Rollback(ctx)
 		return internalErrors.ErrNotEnoughBalance
 	}
 
-	result, err := withdrawRepository.AddWithdraw(tx, withdraw.OrderNumber, withdraw.Sum, rfc3339Time, login)
+	result, err := withdrawRepository.AddWithdraw(ctx, tx, withdraw.OrderNumber, withdraw.Sum, rfc3339Time, login)
 	if err != nil {
-		errTx := tx.Rollback(context.Background())
+		errTx := tx.Rollback(ctx)
 		if errTx != nil {
 			return errTx
 		}
@@ -139,28 +139,28 @@ func (s *Storage) AddWithdrawFromBalance(withdraw balance.Withdraw, login string
 	}
 
 	if result == nil {
-		_ = tx.Rollback(context.Background())
+		_ = tx.Rollback(ctx)
 		logger.WriteErrorLog("AddWithdraw error in sql empty result")
 		return errors.New("error in sql empty result")
 	}
 
 	rows := result.RowsAffected()
 	if rows != 1 {
-		_ = tx.Rollback(context.Background())
+		_ = tx.Rollback(ctx)
 		logger.WriteErrorLog("AddWithdraw RowsAffected error expected to affect 1 row")
 		return errors.New("expected to affect 1 row")
 	}
 
-	_, err = balanceRepository.OperatingBalance(tx, withdraw.Sum, "-", login)
+	_, err = balanceRepository.OperatingBalance(ctx, tx, withdraw.Sum, "-", login)
 	if err != nil {
-		errTx := tx.Rollback(context.Background())
+		errTx := tx.Rollback(ctx)
 		if errTx != nil {
 			return errTx
 		}
 		return err
 	}
 
-	err = tx.Commit(context.Background())
+	err = tx.Commit(ctx)
 	if err != nil {
 		return err
 	}

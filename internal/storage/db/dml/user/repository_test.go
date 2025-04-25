@@ -88,7 +88,7 @@ func TestUpdateToken(t *testing.T) {
 					tt.expiredAt,
 					tt.login).
 				Return(expectedCommandTag, nil)
-			_, err := UpdateToken(&dbr, tt.login, tt.token, tt.expiredAt)
+			_, err := UpdateToken(context.Background(), &dbr, tt.login, tt.token, tt.expiredAt)
 			assert.NoError(t, err)
 		})
 	}

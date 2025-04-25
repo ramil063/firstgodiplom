@@ -38,7 +38,7 @@ func putOrder(rw http.ResponseWriter, r *http.Request, dbs storage.Storager) {
 		return
 	}
 
-	order, err := dbs.GetOrder(number)
+	order, err := dbs.GetOrder(r.Context(), number)
 	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		logger.WriteErrorLog(err.Error())
 		rw.WriteHeader(http.StatusInternalServerError)
@@ -64,7 +64,7 @@ func putOrder(rw http.ResponseWriter, r *http.Request, dbs storage.Storager) {
 		return
 	}
 
-	err = dbs.AddOrder(number, tokenData)
+	err = dbs.AddOrder(r.Context(), number, tokenData)
 	if err != nil {
 		logger.WriteErrorLog(err.Error())
 		rw.WriteHeader(http.StatusInternalServerError)
@@ -85,7 +85,7 @@ func getOrders(rw http.ResponseWriter, r *http.Request, dbs storage.Storager) {
 		return
 	}
 
-	orders, err := dbs.GetOrders(tokenData.Login)
+	orders, err := dbs.GetOrders(r.Context(), tokenData.Login)
 	if err != nil {
 		logger.WriteErrorLog(err.Error())
 		rw.WriteHeader(http.StatusInternalServerError)

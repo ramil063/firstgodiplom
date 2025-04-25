@@ -20,9 +20,9 @@ import (
 )
 
 // UpdateToken обновить токен авторизации
-func (s *Storage) UpdateToken(login string, t auth.Token, expiredAt int64) error {
+func (s *Storage) UpdateToken(ctx context.Context, login string, t auth.Token, expiredAt int64) error {
 
-	result, err := userRepository.UpdateToken(&repository.DBRepository, login, t.Token, expiredAt)
+	result, err := userRepository.UpdateToken(ctx, &repository.DBRepository, login, t.Token, expiredAt)
 
 	if err != nil {
 		return err
@@ -41,70 +41,70 @@ func (s *Storage) UpdateToken(login string, t auth.Token, expiredAt int64) error
 }
 
 // UpdateOrderAccrual обновить данные по начислению данных в заказе
-func (s *Storage) UpdateOrderAccrual(orderFromAccrual accrualStorage.Order) error {
+func (s *Storage) UpdateOrderAccrual(ctx context.Context, orderFromAccrual accrualStorage.Order) error {
 
 	internalOrderStatus := statusConstants.AccrualStatusesOrderStatusesMap[orderFromAccrual.Status]
 
-	tx, err := repository.DBRepository.Pool.BeginTx(context.Background(), pgx.TxOptions{})
+	tx, err := repository.DBRepository.Pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(context.Background())
+	defer tx.Rollback(ctx)
 
-	resultUpdateOrderAccrual, err := orderRepository.UpdateOrderAccrual(tx, orderFromAccrual.Order, orderFromAccrual.Accrual, internalOrderStatus)
+	resultUpdateOrderAccrual, err := orderRepository.UpdateOrderAccrual(ctx, tx, orderFromAccrual.Order, orderFromAccrual.Accrual, internalOrderStatus)
 	if err != nil {
-		_ = tx.Rollback(context.Background())
+		_ = tx.Rollback(ctx)
 		return err
 	}
 	if resultUpdateOrderAccrual == nil {
-		_ = tx.Rollback(context.Background())
+		_ = tx.Rollback(ctx)
 		logger.WriteErrorLog("UpdateOrderAccrual error in sql empty result")
 		return errors.New("error in sql empty result")
 	}
 	rows := resultUpdateOrderAccrual.RowsAffected()
 	if rows != 1 {
-		_ = tx.Rollback(context.Background())
+		_ = tx.Rollback(ctx)
 		logger.WriteErrorLog("UpdateOrderAccrual error expected to affect 1 row")
 		return errors.New("expected to affect 1 row")
 	}
 
-	orderEntity, err := orderRepository.GetOrder(tx, orderFromAccrual.Order)
+	orderEntity, err := orderRepository.GetOrder(ctx, tx, orderFromAccrual.Order)
 	if err != nil {
-		_ = tx.Rollback(context.Background())
+		_ = tx.Rollback(ctx)
 		logger.WriteErrorLog("GetOrder error in sql")
 		return err
 	}
 
-	balance, err := balanceRepository.GetBalanceForUpdate(tx, orderEntity.UserLogin)
+	balance, err := balanceRepository.GetBalanceForUpdate(ctx, tx, orderEntity.UserLogin)
 	if err != nil {
-		_ = tx.Rollback(context.Background())
+		_ = tx.Rollback(ctx)
 		logger.WriteErrorLog("GetBalanceForUpdate error in sql")
 		return err
 	}
 	if balance.ID == 0 {
-		_ = tx.Rollback(context.Background())
+		_ = tx.Rollback(ctx)
 		logger.WriteErrorLog("GetBalanceForUpdate error in sql")
 		return errors.New("error in sql empty result")
 	}
 
-	_, err = balanceRepository.OperatingBalance(tx, orderFromAccrual.Accrual, "+", orderEntity.UserLogin)
+	_, err = balanceRepository.OperatingBalance(ctx, tx, orderFromAccrual.Accrual, "+", orderEntity.UserLogin)
 	if err != nil {
-		_ = tx.Rollback(context.Background())
+		_ = tx.Rollback(ctx)
 		return err
 	}
 
-	err = tx.Commit(context.Background())
+	err = tx.Commit(ctx)
 	return err
 }
 
 // UpdateOrderCheckAccrualAfter обновить дату повторного запроса данных заказа в акруал
-func (s *Storage) UpdateOrderCheckAccrualAfter(orderNumber string) error {
+func (s *Storage) UpdateOrderCheckAccrualAfter(ctx context.Context, orderNumber string) error {
 
 	checkAfterUnix := time.Now().Unix()
 	if env.AppEnv == "PROD" {
 		checkAfterUnix += orderConstants.CheckAccrualAfterSeconds
 	}
-	result, err := orderRepository.UpdateOrderCheckAccrualAfter(&repository.DBRepository, orderNumber, checkAfterUnix)
+	result, err := orderRepository.UpdateOrderCheckAccrualAfter(ctx, &repository.DBRepository, orderNumber, checkAfterUnix)
 
 	if err != nil {
 		return err

@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"context"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -46,7 +47,7 @@ func TestCheckAuthMiddleware(t *testing.T) {
 				AccessToken:          "123",
 				AccessTokenExpiredAt: time.Now().Add(time.Minute).Unix(),
 			}
-			storageMock.EXPECT().GetAccessTokenData("123").Return(token, nil)
+			storageMock.EXPECT().GetAccessTokenData(context.Background(), "123").Return(token, nil)
 
 			handlerToTest := CheckAuthMiddleware(storageMock)(handler)
 			handlerToTest.ServeHTTP(w, request)

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -40,7 +41,7 @@ func ProcessAccrual(c Clienter, s storage.Storager, ticker *time.Ticker) {
 			ordersCh := make(chan user.OrderCheckAccrual)
 			go func() {
 				defer close(ordersCh)
-				orders, err := s.GetAllOrdersInStatuses([]int{orderStatus.NewID, orderStatus.ProcessedID})
+				orders, err := s.GetAllOrdersInStatuses(context.Background(), []int{orderStatus.NewID, orderStatus.ProcessedID})
 				if err != nil {
 					log.Println(err.Error())
 				} else {
@@ -79,7 +80,7 @@ func SyncAccrual(c Clienter, url string, ordersCh chan user.OrderCheckAccrual, s
 				logMsg, _ := json.Marshal(order)
 				logger.WriteInfoLog(string(logMsg))
 				log.Println("accrual: 200, order: ", order)
-				err = s.UpdateOrderAccrual(order)
+				err = s.UpdateOrderAccrual(context.Background(), order)
 			}
 
 			if err != nil {
@@ -90,7 +91,7 @@ func SyncAccrual(c Clienter, url string, ordersCh chan user.OrderCheckAccrual, s
 
 		if responseCode == http.StatusNoContent {
 			log.Println("order not registered in accrual system")
-			err = s.UpdateOrderCheckAccrualAfter(order.Number)
+			err = s.UpdateOrderCheckAccrualAfter(context.Background(), order.Number)
 			if err != nil {
 				logger.WriteDebugLog(err.Error())
 			}

@@ -42,7 +42,7 @@ func TestAddBalance(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			_, err = AddBalance(tx, tt.login)
+			_, err = AddBalance(context.Background(), tx, tt.login)
 			assert.NoError(t, err)
 		})
 	}
@@ -90,7 +90,7 @@ func TestGetBalance(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			got, err := GetBalanceForUpdate(tx, tt.login)
+			got, err := GetBalanceForUpdate(context.Background(), tx, tt.login)
 			assert.Equal(t, got.ID, expectedBalance.ID)
 			assert.Equal(t, got.Current, expectedBalance.Current)
 			assert.Equal(t, got.Withdrawn, expectedBalance.Withdrawn)
@@ -135,7 +135,7 @@ func TestOperatingBalance(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			_, err = OperatingBalance(tx, tt.sum, tt.operator, tt.login)
+			_, err = OperatingBalance(context.Background(), tx, tt.sum, tt.operator, tt.login)
 			assert.NoError(t, err)
 		})
 	}

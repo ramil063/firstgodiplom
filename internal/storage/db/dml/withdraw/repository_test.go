@@ -48,7 +48,7 @@ func TestAddWithdraw(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			_, err = AddWithdraw(tx, tt.orderNumber, tt.sum, tt.processedAt, tt.login)
+			_, err = AddWithdraw(context.Background(), tx, tt.orderNumber, tt.sum, tt.processedAt, tt.login)
 			assert.NoError(t, err)
 		})
 	}
