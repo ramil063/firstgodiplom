@@ -191,10 +191,8 @@ func TestSyncAccrual(t *testing.T) {
 			ordersCh <- tt.returnFromStorage[0]
 
 			go SyncAccrual(clientMock, tt.url, ordersCh, storageMock, tt.worker)
-			select {
-			case <-time.After(1100 * time.Millisecond):
-				log.Println("close without error")
-			}
+			<-time.After(1100 * time.Millisecond)
+			log.Println("close without error")
 			handlersOrderTestGlobalWg.Wait()
 		})
 	}
