@@ -34,7 +34,9 @@ func ProcessAccrual(c Clienter, s storage.Storager, ticker *time.Ticker) {
 
 	for {
 		<-ticker.C
-		RetryAfter.Add(-1)
+		if RetryAfter.Load() > 0 {
+			RetryAfter.Add(-1)
+		}
 		ordersCh := make(chan user.OrderCheckAccrual)
 		go func() {
 			defer close(ordersCh)
