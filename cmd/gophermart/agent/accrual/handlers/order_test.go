@@ -188,15 +188,12 @@ func TestSyncAccrual(t *testing.T) {
 
 			ordersCh := make(chan user.OrderCheckAccrual, 1)
 			defer close(ordersCh)
-			retryAfterChan := make(chan int, 1)
 			ordersCh <- tt.returnFromStorage[0]
 
-			go SyncAccrual(clientMock, tt.url, ordersCh, storageMock, tt.worker, retryAfterChan)
+			go SyncAccrual(clientMock, tt.url, ordersCh, storageMock, tt.worker)
 			select {
 			case <-time.After(1100 * time.Millisecond):
 				log.Println("close without error")
-			case <-retryAfterChan:
-				log.Println("close with retry")
 			}
 			handlersOrderTestGlobalWg.Wait()
 		})

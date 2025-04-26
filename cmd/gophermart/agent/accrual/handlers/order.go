@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"sync/atomic"
 	"time"
 
 	accrualStorage "github.com/ramil063/firstgodiplom/cmd/gophermart/agent/accrual/storage"
@@ -15,6 +16,8 @@ import (
 	orderStatus "github.com/ramil063/firstgodiplom/internal/constants/status"
 	"github.com/ramil063/firstgodiplom/internal/logger"
 )
+
+var RetryAfter atomic.Int32
 
 // OrdersProcess запускает основную горутину для проверки заказов в сервисе акруал
 func OrdersProcess(c Clienter, s storage.Storager) {
@@ -28,41 +31,37 @@ func OrdersProcess(c Clienter, s storage.Storager) {
 // ProcessAccrual опрашивает каждый интервал времени сервис акруал
 func ProcessAccrual(c Clienter, s storage.Storager, ticker *time.Ticker) {
 	defer ticker.Stop()
-	retryAfterChan := make(chan int, 1)
-	var retryAfter int
 
 	for {
-		select {
-		case retryAfter = <-retryAfterChan:
-			time.Sleep(time.Duration(retryAfter) * time.Second)
-			log.Printf("retryAfterChan Resuming work...\n")
-			continue // Возвращаемся к отправке запросов
-		case <-ticker.C:
-			ordersCh := make(chan user.OrderCheckAccrual)
-			go func() {
-				defer close(ordersCh)
-				orders, err := s.GetAllOrdersInStatuses(context.Background(), []int{orderStatus.NewID, orderStatus.ProcessedID})
-				if err != nil {
-					log.Println(err.Error())
-				} else {
-					for _, order := range orders {
-						ordersCh <- order
-					}
+		<-ticker.C
+		RetryAfter.Add(-1)
+		ordersCh := make(chan user.OrderCheckAccrual)
+		go func() {
+			defer close(ordersCh)
+			orders, err := s.GetAllOrdersInStatuses(context.Background(), []int{orderStatus.NewID, orderStatus.ProcessedID})
+			if err != nil {
+				log.Println(err.Error())
+			} else {
+				for _, order := range orders {
+					ordersCh <- order
 				}
-			}()
-
-			for worker := 0; worker < accrualStorage.NumberOfWorkers; worker++ {
-				go SyncAccrual(c, flags.AccrualSystemAddress, ordersCh, s, worker, retryAfterChan)
 			}
+		}()
+
+		for worker := 0; worker < accrualStorage.NumberOfWorkers; worker++ {
+			go SyncAccrual(c, flags.AccrualSystemAddress, ordersCh, s, worker)
 		}
 	}
 }
 
 // SyncAccrual отправляет запрос в акруал и обрабатывает ответ от него
-func SyncAccrual(c Clienter, url string, ordersCh chan user.OrderCheckAccrual, s storage.Storager, worker int, retryAfterChan chan int) {
+func SyncAccrual(c Clienter, url string, ordersCh chan user.OrderCheckAccrual, s storage.Storager, worker int) {
 	ordersCheckURL := url + "/api/orders/"
 
 	for order := range ordersCh {
+		if RetryAfter.Load() > 0 {
+			continue
+		}
 		responseCode, body, header, err := c.SendRequest("GET", ordersCheckURL+order.Number, []byte{})
 
 		if err != nil {
@@ -102,14 +101,20 @@ func SyncAccrual(c Clienter, url string, ordersCh chan user.OrderCheckAccrual, s
 			if retryAfter != "" {
 				if seconds, err := strconv.Atoi(retryAfter); err == nil {
 					log.Printf("Worker %d: Received 429 status, will retry after %d seconds\n", worker, seconds)
-					retryAfterChan <- seconds
+					if RetryAfter.Load() <= 0 {
+						RetryAfter.Swap(int32(seconds))
+					}
 				} else {
 					log.Printf("Worker %d: Received 429 status, will retry after %d seconds\n", worker, accrualStorage.DefaultRetryAfterInterval)
-					retryAfterChan <- accrualStorage.DefaultRetryAfterInterval
+					if RetryAfter.Load() <= 0 {
+						RetryAfter.Swap(int32(accrualStorage.DefaultRetryAfterInterval))
+					}
 				}
 			} else {
 				log.Printf("Worker %d: Received 429 status, will retry after %d seconds\n", worker, accrualStorage.DefaultRetryAfterInterval)
-				retryAfterChan <- accrualStorage.DefaultRetryAfterInterval
+				if RetryAfter.Load() <= 0 {
+					RetryAfter.Swap(int32(accrualStorage.DefaultRetryAfterInterval))
+				}
 			}
 		}
 
